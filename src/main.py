@@ -38,13 +38,12 @@ class GameVisual(object):
         
         run = True
         while run:
-            time_delta = self.clock.tick(60)/1000.0
+            time_delta = self.clock.tick(60)/1000
             for event in pygame.event.get():
                 match event.type:
                     case pygame_gui.UI_BUTTON_PRESSED:
                         if event.ui_element == main_menu_button:
                             run = False
-                            self.main_menu()
 
                 manager.process_events(event)
 
@@ -53,7 +52,6 @@ class GameVisual(object):
             manager.draw_ui(self.window_surface)
 
             pygame.display.update()
-
 
     def main_menu(self):
         manager = pygame_gui.UIManager((self.__SCREEN_WIDTH, self.__SCRENN_HEIGHT))
@@ -77,21 +75,27 @@ class GameVisual(object):
         
         run = True
         while run:
-            time_delta = self.clock.tick(60)/1000.0
+            time_delta = self.clock.tick(60)/1000
             for event in pygame.event.get():
                 match event.type:
                     case pygame.KEYDOWN:
                         match event.key:
                             case pygame.K_ESCAPE:
                                 run = False
+                                
 
                     case pygame.QUIT:
                         run = False
                     case pygame_gui.UI_BUTTON_PRESSED:
                         if event.ui_element == quit_button:
                             run = False
-                        if event.ui_element == new_game_button:
+                        elif event.ui_element == new_game_button:
                             self.start_game()
+                        elif event.ui_element == load_game_button:
+                            if table_of_results_button.is_enabled:
+                                table_of_results_button.disable() #just for test disabling buttons
+                            else:
+                                table_of_results_button.enable()
 
                 manager.process_events(event)
 
