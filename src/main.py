@@ -5,6 +5,9 @@ import os
 from game_class import *
 
 
+TABLE_COLOR = [0, 186, 143]
+
+
 def resource_path(relative):
     if hasattr(sys, "_MEIPASS"):
         return os.path.join(sys._MEIPASS, relative)
@@ -67,6 +70,10 @@ class PlayUI:
             f"bid: {self.game.bid}", 1, (0, 0, 0)
         )
 
+        self.hand_border = pygame.Surface((1030, 150))
+        self.hand_border.fill(pygame.Color(TABLE_COLOR))
+        pygame.draw.rect(self.hand_border, (0, 0, 0), pygame.Rect(0, 0, 1030, 150), 2)
+
     def update_money(self):
         self.wallet_value_text = self.font_of_message.render(
             f"wallet: {self.game.wallet}", 1, (0, 0, 0)
@@ -89,7 +96,6 @@ class GameVisual(object):
         self.__CAPTION = "BlackJack"
         icon_path = resource_path(os.path.join("img/icons", "icon.png"))
         self.__icon = pygame.image.load(icon_path)
-        self.__TABLE_COLOR = [0, 186, 143]  # switched by font image maybe
         pygame.init()
 
         pygame.display.set_caption(self.__CAPTION)
@@ -98,7 +104,7 @@ class GameVisual(object):
         )
         pygame.display.set_icon(self.__icon)
         self.background = pygame.Surface((self.__SCREEN_WIDTH, self.__SCRENN_HEIGHT))
-        self.background.fill(pygame.Color(self.__TABLE_COLOR))
+        self.background.fill(pygame.Color(TABLE_COLOR))
         self.clock = pygame.time.Clock()
 
     def play_game(self):
@@ -157,7 +163,7 @@ class GameVisual(object):
             self.window_surface.blit(ui.bank_value_text, (10, 10))
             self.window_surface.blit(ui.wallet_value_text, (200, 10))
             self.window_surface.blit(ui.bid_value_text, (400, 10))
-            # self.window_surface.blit()
+            self.window_surface.blit(ui.hand_border, (90, 500))
             ui.manager.draw_ui(self.window_surface)
 
             pygame.display.update()
@@ -216,7 +222,6 @@ class GameVisual(object):
 
             manager.update(time_delta)
             self.window_surface.blit(self.background, (0, 0))
-            self.window_surface.blit(self.shirt_surface, (0, 200))
             manager.draw_ui(self.window_surface)
 
             pygame.display.update()
@@ -235,3 +240,4 @@ new_game.main_menu()
 # self.shirt_surface = pygame.Surface((116, 160))
 # self.shirt_surface.blit(self.shirt, (0, 0))
 # self.window_surface.blit()
+# self.window_surface.blit(self.shirt_surface, (0, 200))
