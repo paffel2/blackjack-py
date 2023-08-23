@@ -55,7 +55,28 @@ class PlayUI:
         )
         self.add_bet_button.disable()
 
-    game = Game("player_name")
+        self.game = Game("player_name")
+        self.font_of_message = pygame.font.Font(None, 36)
+        self.wallet_value_text = self.font_of_message.render(
+            f"wallet: {self.game.wallet}", 1, (0, 0, 0)
+        )
+        self.bank_value_text = self.font_of_message.render(
+            f"bank: {self.game.bank}", 1, (0, 0, 0)
+        )
+        self.bid_value_text = self.font_of_message.render(
+            f"bid: {self.game.bid}", 1, (0, 0, 0)
+        )
+
+    def update_money(self):
+        self.wallet_value_text = self.font_of_message.render(
+            f"wallet: {self.game.wallet}", 1, (0, 0, 0)
+        )
+        self.bank_value_text = self.font_of_message.render(
+            f"bank: {self.game.bank}", 1, (0, 0, 0)
+        )
+        self.bid_value_text = self.font_of_message.render(
+            f"bid: {self.game.bid}", 1, (0, 0, 0)
+        )
 
     def __str__(self):
         return "ui"
@@ -66,9 +87,8 @@ class GameVisual(object):
         self.__SCREEN_WIDTH = 1200
         self.__SCRENN_HEIGHT = 800
         self.__CAPTION = "BlackJack"
-        path = resource_path(os.path.join("img/icons", "icon.png"))
-        self.__icon = pygame.image.load(path)
-
+        icon_path = resource_path(os.path.join("img/icons", "icon.png"))
+        self.__icon = pygame.image.load(icon_path)
         self.__TABLE_COLOR = [0, 186, 143]  # switched by font image maybe
         pygame.init()
 
@@ -98,6 +118,7 @@ class GameVisual(object):
                                 ui.bet_button.enable()
                             case ui.add_bet_button:
                                 ui.game.bid_more()
+                                ui.update_money()
                             case ui.bet_button:
                                 try:
                                     ui.game.bet()
@@ -108,6 +129,7 @@ class GameVisual(object):
                                     ui.game.shuffleDeck()
                                     ui.game.moreCards()
                                     ui.game.moreCards()
+                                    ui.update_money()
                                     print(ui.game.__str__())
                                 except EmptyBet as e:
                                     print(f"{e} {e.message}")
@@ -117,12 +139,14 @@ class GameVisual(object):
                                     print(e)
                             case ui.more_cards_button:
                                 ui.game.moreCards()
+                                ui.update_money()
                                 print(list_to_string(ui.game.hand))
                             case ui.open_cards_button:
                                 ui.game.result()
                                 ui.start_game_button.enable()
                                 ui.more_cards_button.disable()
                                 ui.open_cards_button.disable()
+                                ui.update_money()
                                 print(ui.game.__str__())
                                 ui.game.nextGame()
 
@@ -130,6 +154,10 @@ class GameVisual(object):
 
             ui.manager.update(time_delta)
             self.window_surface.blit(self.background, (0, 0))
+            self.window_surface.blit(ui.bank_value_text, (10, 10))
+            self.window_surface.blit(ui.wallet_value_text, (200, 10))
+            self.window_surface.blit(ui.bid_value_text, (400, 10))
+            # self.window_surface.blit()
             ui.manager.draw_ui(self.window_surface)
 
             pygame.display.update()
@@ -188,13 +216,22 @@ class GameVisual(object):
 
             manager.update(time_delta)
             self.window_surface.blit(self.background, (0, 0))
+            self.window_surface.blit(self.shirt_surface, (0, 200))
             manager.draw_ui(self.window_surface)
 
             pygame.display.update()
-        # del manager
+
         pygame.quit()
         sys.exit()
 
 
 new_game = GameVisual()
 new_game.main_menu()
+
+
+# shirt_path = resource_path(os.path.join("img/cards/shirts", "Back_Red.png"))
+# self.shirt = pygame.image.load(shirt_path)
+# self.shirt = pygame.transform.scale(self.shirt, (116, 160))
+# self.shirt_surface = pygame.Surface((116, 160))
+# self.shirt_surface.blit(self.shirt, (0, 0))
+# self.window_surface.blit()
