@@ -1,4 +1,7 @@
 from random import shuffle
+import pygame
+import sys
+import os
 
 
 class Card:
@@ -12,19 +15,19 @@ class Card:
         return f"(Card: Suit: {self.suit} Value: {self.value})"
 
 
-TWO = "two"
-THREE = "three"
-FOUR = "four"
-FIVE = "five"
-SIX = "six"
-SEVEN = "seven"
-EIGHT = "eight"
-NINE = "nine"
-TEN = "ten"
-JACK = "jack"
-QUEEN = "queen"
-KING = "king"
-ACE = "ace"
+TWO = "2"
+THREE = "3"
+FOUR = "4"
+FIVE = "5"
+SIX = "6"
+SEVEN = "7"
+EIGHT = "8"
+NINE = "9"
+TEN = "10"
+JACK = "J"
+QUEEN = "Q"
+KING = "K"
+ACE = "A"
 
 CLUBS = "clubs"
 DIAMONDS = "diamonds"
@@ -53,3 +56,16 @@ def initDeck():
             tempList.append(Card(i, j))
     shuffle(tempList)
     return tempList
+
+
+def resource_path(relative):
+    if hasattr(sys, "_MEIPASS"):
+        return os.path.join(sys._MEIPASS, relative)
+    return os.path.join(relative)
+
+
+def read_card(card: Card):
+    card_image_path = resource_path(
+        os.path.join(f"img/cards/{card.suit}", f"{card.value}.png")
+    )
+    return pygame.image.load(card_image_path)
