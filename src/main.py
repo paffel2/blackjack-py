@@ -7,6 +7,12 @@ from surfaces import *
 
 
 TABLE_COLOR = [0, 186, 143]
+SCREEN_WIDTH = 1200
+SCRENN_HEIGHT = 800
+background = pygame.Surface((SCREEN_WIDTH, SCRENN_HEIGHT))
+background.fill(pygame.Color(TABLE_COLOR))
+zero_position = (0, 0)
+clock = pygame.time.Clock()
 
 
 def resource_path(relative):
@@ -17,6 +23,9 @@ def resource_path(relative):
 
 class PlayUI:
     def __init__(self, width, height):
+        self.scene = pygame.Surface((SCREEN_WIDTH, SCRENN_HEIGHT))
+        self.scene.fill(pygame.Color(TABLE_COLOR))
+
         self.manager = pygame_gui.UIManager((width, height))
         self.main_menu_button = pygame_gui.elements.UIButton(
             relative_rect=pygame.Rect((0, 700), (100, 50)),
@@ -78,6 +87,7 @@ class PlayUI:
         self.hand_surface.fill(pygame.Color((TABLE_COLOR)))
         self.hand_border.blit(self.hand_surface, (5, 5))
         self.cards_surfaces = []
+        self.clock = pygame.time.Clock()
 
     def update_money(self):
         self.wallet_value_text = self.font_of_message.render(
@@ -95,7 +105,7 @@ class PlayUI:
         card_image = pygame.transform.scale(card_image, (116, 160))
         card_surface = pygame.Surface((116, 160))
         card_surface.fill(pygame.Color(TABLE_COLOR))
-        card_surface.blit(card_image, ((0, 0)))
+        card_surface.blit(card_image, zero_position)
         self.hand_surface.blit_next(card_surface)
         self.hand_border.blit(self.hand_surface, (5, 5))
         self.cards_surfaces.append(card_surface)
@@ -116,30 +126,33 @@ class PlayUI:
     def __str__(self):
         return "ui"
 
+    def update_scene(self):
+        time_delta = clock.tick(60) / 1000
+        self.manager.update(time_delta)
+        self.scene.blit(background, zero_position)
+        self.scene.blit(self.bank_value_text, (10, 10))
+        self.scene.blit(self.wallet_value_text, (200, 10))
+        self.scene.blit(self.bid_value_text, (400, 10))
+        self.scene.blit(self.hand_border, (90, 500))
+        self.manager.draw_ui(self.scene)
+
 
 class GameVisual(object):
     def __init__(self):
-        self.__SCREEN_WIDTH = 1200
-        self.__SCRENN_HEIGHT = 800
         self.__CAPTION = "BlackJack"
         icon_path = resource_path(os.path.join("img/icons", "icon.png"))
         self.__icon = pygame.image.load(icon_path)
         pygame.init()
 
         pygame.display.set_caption(self.__CAPTION)
-        self.window_surface = pygame.display.set_mode(
-            (self.__SCREEN_WIDTH, self.__SCRENN_HEIGHT)
-        )
+        self.window_surface = pygame.display.set_mode((SCREEN_WIDTH, SCRENN_HEIGHT))
         pygame.display.set_icon(self.__icon)
-        self.background = pygame.Surface((self.__SCREEN_WIDTH, self.__SCRENN_HEIGHT))
-        self.background.fill(pygame.Color(TABLE_COLOR))
         self.clock = pygame.time.Clock()
 
     def play_game(self):
-        ui = PlayUI(self.__SCREEN_WIDTH, self.__SCRENN_HEIGHT)
+        ui = PlayUI(SCREEN_WIDTH, SCRENN_HEIGHT)
         run = True
         while run:
-            time_delta = self.clock.tick(60) / 1000
             for event in pygame.event.get():
                 match event.type:
                     case pygame_gui.UI_BUTTON_PRESSED:
@@ -194,18 +207,12 @@ class GameVisual(object):
 
                 ui.manager.process_events(event)
 
-            ui.manager.update(time_delta)
-            self.window_surface.blit(self.background, (0, 0))
-            self.window_surface.blit(ui.bank_value_text, (10, 10))
-            self.window_surface.blit(ui.wallet_value_text, (200, 10))
-            self.window_surface.blit(ui.bid_value_text, (400, 10))
-            self.window_surface.blit(ui.hand_border, (90, 500))
-            ui.manager.draw_ui(self.window_surface)
-
+            ui.update_scene()
+            self.window_surface.blit(ui.scene, zero_position)
             pygame.display.update()
 
     def main_menu(self):
-        manager = pygame_gui.UIManager((self.__SCREEN_WIDTH, self.__SCRENN_HEIGHT))
+        manager = pygame_gui.UIManager((SCREEN_WIDTH, SCRENN_HEIGHT))
 
         new_game_button = pygame_gui.elements.UIButton(
             relative_rect=pygame.Rect((400, 250), (400, 50)),
@@ -233,7 +240,6 @@ class GameVisual(object):
 
         run = True
         while run:
-            time_delta = self.clock.tick(60) / 1000
             for event in pygame.event.get():
                 match event.type:
                     case pygame.KEYDOWN:
@@ -255,9 +261,9 @@ class GameVisual(object):
                                 table_of_results_button.enable()
 
                 manager.process_events(event)
-
+            time_delta = clock.tick(60) / 1000
             manager.update(time_delta)
-            self.window_surface.blit(self.background, (0, 0))
+            self.window_surface.blit(background, zero_position)
             manager.draw_ui(self.window_surface)
 
             pygame.display.update()

@@ -70,26 +70,27 @@ class Game:
         resultValue = 0
         for i in self.hand:
             match i.value:
-                case "two":
+                case "2":
                     resultValue += 2
-                case "three":
+                case "3":
                     resultValue += 3
-                case "four":
+                case "4":
                     resultValue += 4
-                case "five":
+                case "5":
                     resultValue += 5
-                case "six":
+                case "6":
                     resultValue += 6
-                case "seven":
+                case "7":
                     resultValue += 7
-                case "eight":
+                case "8":
                     resultValue += 8
-                case "nine":
+                case "9":
                     resultValue += 9
-                case "ace":
+                case "A":
                     resultValue += 11
                 case _:
                     resultValue += 10
+        print(f"result_value: {resultValue}")
         if resultValue < 21:
             self.wallet += self.bid
             self.bid = 0
