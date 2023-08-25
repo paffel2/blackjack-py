@@ -1,4 +1,10 @@
 from cards import *
+import json
+
+STATUS_INIT = "GAME_INIT"
+STATUS_STARTED = "GAME_STARTED"
+STATUS_IN_PROGRESS = "GAME_IN_PROGRESS"
+STATUS_ENDED = "GAME_ENDED"
 
 
 def list_to_string(list):
@@ -11,30 +17,38 @@ def list_to_string(list):
 
 
 class Game:
-    def __init__(self, player_name):
-        self.player_name = player_name
-        self.bank = 1000000
-        self.wallet = 10000
-        self.hand = []
-        self.deck = []
-        self.bid = 0
-        self.gameStatus = STATUS_INIT
-        self.gameResult = "NOT ENDED"
+    def __init__(
+        self,
+        bank=1000000,
+        wallet=10000,
+        hand=[],
+        deck=[],
+        bid=0,
+        game_status=STATUS_INIT,
+        game_result="NOT ENDED",
+    ):
+        self.bank = bank
+        self.wallet = wallet
+        self.hand = hand
+        self.deck = deck
+        self.bid = bid
+        self.game_status = game_status
+        self.game_result = game_result
 
     def __str__(self) -> str:
-        return f"""player_name: {self.player_name} \n
-                   bank: {self.bank} \n  
-                   wallet: {self.wallet} \n
-                   hand: {list_to_string(self.hand)} \n
-                   deck: {"deck"} \n
-                   bid: {self.bid} \n
-                   status: {self.gameStatus} \n
-                   result: {self.gameResult} \n
+        return f""" GAME:
+bank: {self.bank} \n  
+wallet: {self.wallet} \n
+hand: {list_to_string(self.hand)} \n
+deck: {list_to_string(self.deck)} \n
+bid: {self.bid} \n
+status: {self.game_status} \n
+result: {self.game_result} \n
                 """
 
     def shuffleDeck(self):
         self.deck = initDeck()
-        self.gameStatus = "INGAME"
+        self.game_status = "INGAME"
 
     def bid_more(self):
         self.bid += 100
@@ -63,8 +77,8 @@ class Game:
     def nextGame(self):
         self.hand = []
         self.deck = initDeck()
-        self.gameStatus = "INIT"
-        self.gameResult = "NOT ENDED"
+        self.game_status = "INIT"
+        self.game_result = "NOT ENDED"
 
     def result(self):
         resultValue = 0
@@ -94,25 +108,41 @@ class Game:
         if resultValue < 21:
             self.wallet += self.bid
             self.bid = 0
-            self.gameStatus = "ENDED"
-            self.gameResult = "PUSH"
+            self.game_status = "ENDED"
+            self.game_result = "PUSH"
         elif resultValue == 21:
             self.wallet += 2 * self.bid
             self.bank -= self.bid
             self.bid = 0
-            self.gameStatus = "ENDED"
-            self.gameResult = "WIN"
+            self.game_status = "ENDED"
+            self.game_result = "WIN"
         else:
             self.bank += self.bid
             self.bid = 0
-            self.gameStatus = "ENDED"
-            self.gameResult = "FAULT"
+            self.game_status = "ENDED"
+            self.game_result = "FAULT"
+
+    def save_game(self):
+        to_save = {
+            "bank": self.bank,
+            "wallet": self.wallet,
+            "hand": [str(i) for i in self.hand],
+            "game_status": self.game_status,
+            "game_result": self.game_result,
+        }
+        filename = f"saves/save.save"
+        with open(filename, "w") as f:
+            json.dump(to_save, f)
+        f.close()
 
 
-STATUS_INIT = "GAME_INIT"
-STATUS_STARTED = "GAME_STARTED"
-STATUS_IN_PROGRESS = "GAME_IN_PROGRESS"
-STATUS_ENDED = "GAME_ENDED"
+def load_game():
+    filename = f"saves/save.save"
+    with open(filename) as f:
+        readed_dict = json.load(f)
+    readed_dict["hand"] = list(map(to_card, readed_dict["hand"]))
+    f.close()
+    return Game(**readed_dict)
 
 
 class EmptyBet(Exception):
@@ -125,3 +155,20 @@ class BetMoreThanInWallet(Exception):
 
 class ToMuchCards(Exception):
     message = "I don't need more cards"
+
+
+# test values
+# a = Game()
+
+# card1 = Card(SPADES, "2")
+# card2 = Card(DIAMONDS, "A")
+# a.hand = [card1, card2]
+
+# print(a)
+# a.save_game()
+
+
+# d = load_game()
+
+# print(d)
+# print((d.hand[0]))

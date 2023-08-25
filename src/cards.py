@@ -12,7 +12,23 @@ class Card:
         # self.img = img
 
     def __str__(self):
-        return f"(Card: Suit: {self.suit} Value: {self.value})"
+        return f"{self.suit[0]} {self.value}"
+
+
+def to_card(str):
+    suit_str, value_str = str.split(" ")
+    card = Card(None, None)
+    match suit_str:
+        case "C":
+            card.suit = CLUBS
+        case "D":
+            card.suit = DIAMONDS
+        case "H":
+            card.suit = HEARTS
+        case "S":
+            card.suit = SPADES
+    card.value = value_str
+    return card
 
 
 TWO = "2"
@@ -29,10 +45,10 @@ QUEEN = "Q"
 KING = "K"
 ACE = "A"
 
-CLUBS = "clubs"
-DIAMONDS = "diamonds"
-HEARTS = "hearts"
-SPADES = "spades"
+CLUBS = "CLUBS"
+DIAMONDS = "DIAMONDS"
+HEARTS = "HEARTS"
+SPADES = "SPADES"
 
 
 def initDeck():

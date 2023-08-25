@@ -68,7 +68,7 @@ class PlayUI:
         )
         self.add_bet_button.disable()
 
-        self.game = Game("player_name")
+        self.game = Game()
         self.font_of_message = pygame.font.Font(None, 36)
         self.wallet_value_text = self.font_of_message.render(
             f"wallet: {self.game.wallet}", 1, (0, 0, 0)
