@@ -3,6 +3,7 @@ import pygame_gui
 import sys
 import os
 from game_class import *
+from surfaces import *
 
 
 TABLE_COLOR = [0, 186, 143]
@@ -70,9 +71,13 @@ class PlayUI:
             f"bid: {self.game.bid}", 1, (0, 0, 0)
         )
 
-        self.hand_border = pygame.Surface((1030, 150))
+        self.hand_border = pygame.Surface((938, 170))
         self.hand_border.fill(pygame.Color(TABLE_COLOR))
-        pygame.draw.rect(self.hand_border, (0, 0, 0), pygame.Rect(0, 0, 1030, 150), 2)
+        pygame.draw.rect(self.hand_border, (0, 0, 0), pygame.Rect(0, 0, 938, 170), 2)
+        self.hand_surface = HandSurface((928, 160))
+        self.hand_surface.fill(pygame.Color((TABLE_COLOR)))
+        self.hand_border.blit(self.hand_surface, (5, 5))
+        self.cards_surfaces = []
 
     def update_money(self):
         self.wallet_value_text = self.font_of_message.render(
@@ -84,6 +89,29 @@ class PlayUI:
         self.bid_value_text = self.font_of_message.render(
             f"bid: {self.game.bid}", 1, (0, 0, 0)
         )
+
+    def add_and_draw_card_surface(self, card):
+        card_image = read_card(card)
+        card_image = pygame.transform.scale(card_image, (116, 160))
+        card_surface = pygame.Surface((116, 160))
+        card_surface.fill(pygame.Color(TABLE_COLOR))
+        card_surface.blit(card_image, ((0, 0)))
+        self.hand_surface.blit_next(card_surface)
+        self.hand_border.blit(self.hand_surface, (5, 5))
+        self.cards_surfaces.append(card_surface)
+
+    def add_list_of_surfaces(self):
+        for card in self.game.hand:
+            self.add_and_draw_card_surface(card)
+
+    def add_last_card(self):
+        card = self.game.hand[-1]
+        self.add_and_draw_card_surface(card)
+
+    def clean_table(self):
+        self.hand_surface.clean_hand()
+        self.cards_surfaces = []
+        self.hand_border.blit(self.hand_surface, (5, 5))
 
     def __str__(self):
         return "ui"
@@ -119,6 +147,7 @@ class GameVisual(object):
                             case ui.main_menu_button:
                                 run = False
                             case ui.start_game_button:
+                                ui.clean_table()
                                 ui.start_game_button.disable()
                                 ui.add_bet_button.enable()
                                 ui.bet_button.enable()
@@ -136,6 +165,8 @@ class GameVisual(object):
                                     ui.game.moreCards()
                                     ui.game.moreCards()
                                     ui.update_money()
+                                    ui.add_list_of_surfaces()
+
                                     print(ui.game.__str__())
                                 except EmptyBet as e:
                                     print(f"{e} {e.message}")
@@ -144,9 +175,14 @@ class GameVisual(object):
                                 except Exception as e:
                                     print(e)
                             case ui.more_cards_button:
-                                ui.game.moreCards()
-                                ui.update_money()
-                                print(list_to_string(ui.game.hand))
+                                try:
+                                    ui.game.moreCards()
+                                    ui.add_last_card()
+                                    print(list_to_string(ui.game.hand))
+                                except ToMuchCards as e:
+                                    print(e.message)
+                                except Exception as e:
+                                    print(e)
                             case ui.open_cards_button:
                                 ui.game.result()
                                 ui.start_game_button.enable()
@@ -232,12 +268,3 @@ class GameVisual(object):
 
 new_game = GameVisual()
 new_game.main_menu()
-
-
-# shirt_path = resource_path(os.path.join("img/cards/shirts", "Back_Red.png"))
-# self.shirt = pygame.image.load(shirt_path)
-# self.shirt = pygame.transform.scale(self.shirt, (116, 160))
-# self.shirt_surface = pygame.Surface((116, 160))
-# self.shirt_surface.blit(self.shirt, (0, 0))
-# self.window_surface.blit()
-# self.window_surface.blit(self.shirt_surface, (0, 200))

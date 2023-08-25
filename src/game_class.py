@@ -51,7 +51,9 @@ class Game:
             raise BetMoreThanInWallet
 
     def moreCards(self):
-        if len(self.deck) > 0:
+        if len(self.hand) == 8:
+            raise ToMuchCards
+        elif len(self.deck) > 0:
             next_card = self.deck.pop()
             self.hand.append(next_card)
             return "DONE"
@@ -118,3 +120,7 @@ class EmptyBet(Exception):
 
 class BetMoreThanInWallet(Exception):
     message = "Empty BET"
+
+
+class ToMuchCards(Exception):
+    message = "I don't need more cards"
