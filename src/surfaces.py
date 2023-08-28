@@ -17,4 +17,28 @@ class HandSurface(Surface):
         self.last_position = 0
 
 
-# a = Surface()
+######################################### TABLE SURFACE #############################
+class RowSurface(Surface):
+    def __init__(self, size, step, list_of_cells):
+        Surface.__init__(self, size)
+        self.background_color = [0, 186, 143]
+        self.list_of_cells = list_of_cells
+        self.step = step
+        postion = 0
+        self.fill(self.background_color)
+        for cell in self.list_of_cells:
+            self.blit(cell, (postion, 0))
+            postion += step
+
+
+class SheetSurface(Surface):
+    def __init__(self, size, step, list_of_rows):
+        Surface.__init__(self, size)
+        self.background_color = [0, 186, 143]
+        self.list_of_rows = list_of_rows
+        self.step = step
+        postion = 0
+        self.fill(self.background_color)
+        for row in self.list_of_rows:
+            self.blit(row, (0, postion))
+            postion += step

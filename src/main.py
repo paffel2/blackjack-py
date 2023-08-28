@@ -244,6 +244,32 @@ class GameVisual(object):
             self.window_surface.blit(ui.scene, zero_position)
             pygame.display.update()
 
+    def table_of_results(self):  # пример отрисовки таблицы. Вынести в отдельный класс
+        font_of_message = font.Font(None, 30)
+        texts = ["1000000", "Second", "Third", "Fourth"]
+        list_of_cells = []
+        for text in texts:
+            cell = Surface((250, 40))
+            cell.fill(Color(TABLE_COLOR))
+            draw.rect(cell, (0, 0, 0), Rect(0, 0, 250, 40), 1)
+            render_text = font_of_message.render(text, 1, (0, 0, 0))
+            cell.blit(render_text, (10, 10))
+            list_of_cells.append(cell)
+        row = RowSurface((1000, 40), 249, list_of_cells)
+        list_of_rows = [row for _ in range(0, 10)]
+        sheet = SheetSurface((1000, 400), 39, list_of_rows)
+        run = True
+        while run:
+            for event in pygame.event.get():
+                match event.type:
+                    case pygame.KEYDOWN:
+                        match event.key:
+                            case pygame.K_SPACE:
+                                run = False
+            self.window_surface.blit(background, zero_position)
+            self.window_surface.blit(sheet, (100, 200))
+            pygame.display.update()
+
     def main_menu(self):
         manager = pygame_gui.UIManager((SCREEN_WIDTH, SCRENN_HEIGHT))
 
@@ -291,7 +317,7 @@ class GameVisual(object):
                             loaded_game = load_game()
                             self.play_game(loaded_game)
                         elif event.ui_element == table_of_results_button:
-                            pass
+                            self.table_of_results()
                 manager.process_events(event)
             time_delta = clock.tick(60) / 1000
             manager.update(time_delta)
