@@ -45,10 +45,10 @@ QUEEN = "Q"
 KING = "K"
 ACE = "A"
 
-CLUBS = "CLUBS"
-DIAMONDS = "DIAMONDS"
-HEARTS = "HEARTS"
-SPADES = "SPADES"
+CLUBS = "clubs"
+DIAMONDS = "diamonds"
+HEARTS = "hearts"
+SPADES = "spades"
 
 
 def initDeck():
@@ -82,6 +82,6 @@ def resource_path(relative):
 
 def read_card(card: Card):
     card_image_path = resource_path(
-        os.path.join(f"img/cards/{card.suit}", f"{card.value}.png")
+        os.path.join(f"./img/cards/{card.suit}", f"{card.value}.png")
     )
     return pygame.image.load(card_image_path)

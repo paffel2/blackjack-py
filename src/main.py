@@ -140,7 +140,7 @@ class PlayUI:
 class GameVisual(object):
     def __init__(self):
         self.__CAPTION = "BlackJack"
-        icon_path = resource_path(os.path.join("img/icons", "icon.png"))
+        icon_path = resource_path(os.path.join("./img/icons", "icon.png"))
         self.__icon = pygame.image.load(icon_path)
         pygame.init()
 
