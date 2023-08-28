@@ -218,6 +218,7 @@ class GameVisual(object):
                                 ui.start_game_button.disable()
                                 ui.add_bet_button.enable()
                                 ui.bet_button.enable()
+                                ui.update_money()
                                 ui.game.game_status = STATUS_STARTED  # перенести в класс Game, там все отрефакторить
                                 ui.game.save_game()  # ВОЗМОЖНО ТОЖЕ СТОИТ перенести вызов внутри функций класса
                             case ui.add_bet_button:
