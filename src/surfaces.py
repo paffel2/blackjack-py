@@ -2,11 +2,11 @@ from pygame import *
 
 
 class HandSurface(Surface):
-    def __init__(self, size):
+    def __init__(self, size, background_color):
         Surface.__init__(self, size)
         self.last_position = 0
         self.step = 116
-        self.background_color = [0, 186, 143]
+        self.background_color = background_color
 
     def blit_next(self, surface):
         self.blit(surface, (self.last_position, 0))
@@ -19,9 +19,9 @@ class HandSurface(Surface):
 
 ######################################### TABLE SURFACE #############################
 class RowSurface(Surface):
-    def __init__(self, size, step, list_of_cells):
+    def __init__(self, size, step, list_of_cells, background_color):
         Surface.__init__(self, size)
-        self.background_color = [0, 186, 143]
+        self.background_color = background_color
         self.list_of_cells = list_of_cells
         self.step = step
         postion = 0
@@ -32,9 +32,9 @@ class RowSurface(Surface):
 
 
 class SheetSurface(Surface):
-    def __init__(self, size, step, list_of_rows):
+    def __init__(self, size, step, list_of_rows, background_color):
         Surface.__init__(self, size)
-        self.background_color = [0, 186, 143]
+        self.background_color = background_color
         self.list_of_rows = list_of_rows
         self.step = step
         postion = 0

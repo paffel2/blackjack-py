@@ -21,6 +21,39 @@ def resource_path(relative):
     return os.path.join(relative)
 
 
+class SheetScene:
+    def __init__(self):
+        self.scene = pygame.Surface((SCREEN_WIDTH, SCRENN_HEIGHT))
+        self.scene.fill(pygame.Color(TABLE_COLOR))
+        self.manager = pygame_gui.UIManager((SCREEN_WIDTH, SCRENN_HEIGHT))
+        self.main_menu_button = pygame_gui.elements.UIButton(
+            relative_rect=pygame.Rect((350, 700), (500, 50)),
+            text="Main menu",
+            manager=self.manager,
+        )
+
+        font_of_message = font.Font(None, 30)
+        texts = ["1000000", "Second", "Third", "Fourth"]  # ПРИМЕР, ДОБАВИТЬ ЧТЕНИЕ CSV
+        list_of_cells = []
+        for text in texts:
+            cell = pygame.Surface((250, 40))
+            cell.fill(pygame.Color(TABLE_COLOR))
+            pygame.draw.rect(cell, (0, 0, 0), Rect(0, 0, 250, 40), 1)
+            render_text = font_of_message.render(text, 1, (0, 0, 0))
+            cell.blit(render_text, (10, 10))
+            list_of_cells.append(cell)
+        row = RowSurface((1000, 40), 249, list_of_cells, TABLE_COLOR)
+        list_of_rows = [row for _ in range(0, 10)]
+        sheet = SheetSurface((1000, 400), 39, list_of_rows, TABLE_COLOR)
+
+        self.scene.blit(sheet, (100, 200))
+
+    def update_scene(self):
+        time_delta = clock.tick(60) / 1000
+        self.manager.update(time_delta)
+        self.manager.draw_ui(self.scene)
+
+
 class PlayUI:
     def __init__(self, loaded_game=Game()):
         self.scene = pygame.Surface((SCREEN_WIDTH, SCRENN_HEIGHT))
@@ -47,25 +80,21 @@ class PlayUI:
             text="Open cards",
             manager=self.manager,
         )
-        # self.open_cards_button.disable()
         self.more_cards_button = pygame_gui.elements.UIButton(
             relative_rect=pygame.Rect((500, 750), (150, 50)),
             text="More cards",
             manager=self.manager,
         )
-        # self.more_cards_button.disable()
         self.bet_button = pygame_gui.elements.UIButton(
             relative_rect=pygame.Rect((650, 750), (150, 50)),
             text="Bet",
             manager=self.manager,
         )
-        # self.bet_button.disable()
         self.add_bet_button = pygame_gui.elements.UIButton(
             relative_rect=pygame.Rect((800, 750), (150, 50)),
             text="Add bet",
             manager=self.manager,
         )
-        # self.add_bet_button.disable()
 
         self.game = loaded_game
         self.font_of_message = pygame.font.Font(None, 36)
@@ -104,7 +133,7 @@ class PlayUI:
         self.hand_border = pygame.Surface((938, 170))
         self.hand_border.fill(pygame.Color(TABLE_COLOR))
         pygame.draw.rect(self.hand_border, (0, 0, 0), pygame.Rect(0, 0, 938, 170), 2)
-        self.hand_surface = HandSurface((928, 160))
+        self.hand_surface = HandSurface((928, 160), TABLE_COLOR)
         self.hand_surface.fill(pygame.Color((TABLE_COLOR)))
         self.hand_border.blit(self.hand_surface, (5, 5))
         self.cards_surfaces = []
@@ -202,7 +231,6 @@ class GameVisual(object):
                                     ui.bet_button.disable()
                                     ui.open_cards_button.enable()
                                     ui.more_cards_button.enable()
-                                    # ui.game.shuffleDeck()
                                     ui.game.moreCards()
                                     ui.game.moreCards()
                                     ui.update_money()
@@ -244,30 +272,19 @@ class GameVisual(object):
             self.window_surface.blit(ui.scene, zero_position)
             pygame.display.update()
 
-    def table_of_results(self):  # пример отрисовки таблицы. Вынести в отдельный класс
-        font_of_message = font.Font(None, 30)
-        texts = ["1000000", "Second", "Third", "Fourth"]
-        list_of_cells = []
-        for text in texts:
-            cell = Surface((250, 40))
-            cell.fill(Color(TABLE_COLOR))
-            draw.rect(cell, (0, 0, 0), Rect(0, 0, 250, 40), 1)
-            render_text = font_of_message.render(text, 1, (0, 0, 0))
-            cell.blit(render_text, (10, 10))
-            list_of_cells.append(cell)
-        row = RowSurface((1000, 40), 249, list_of_cells)
-        list_of_rows = [row for _ in range(0, 10)]
-        sheet = SheetSurface((1000, 400), 39, list_of_rows)
+    def table_of_results(self):
+        sheet_scene = SheetScene()
         run = True
         while run:
             for event in pygame.event.get():
                 match event.type:
-                    case pygame.KEYDOWN:
-                        match event.key:
-                            case pygame.K_SPACE:
+                    case pygame_gui.UI_BUTTON_PRESSED:
+                        match event.ui_element:
+                            case sheet_scene.main_menu_button:
                                 run = False
-            self.window_surface.blit(background, zero_position)
-            self.window_surface.blit(sheet, (100, 200))
+                sheet_scene.manager.process_events(event)
+            sheet_scene.update_scene()
+            self.window_surface.blit(sheet_scene.scene, zero_position)
             pygame.display.update()
 
     def main_menu(self):
