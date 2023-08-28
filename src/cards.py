@@ -8,24 +8,27 @@ class Card:
     def __init__(self, suit, value):
         self.suit = suit
         self.value = value
-        # self.inGameValue = inGameValue
-        # self.img = img
 
     def __str__(self):
-        return f"{self.suit[0]} {self.value}"
+        return f"{self.suit} {self.value}"
+
+    def __eq__(self, other):
+        if isinstance(other, Card):
+            return self.suit == other.suit and self.value == other.value
+        return NotImplemented
 
 
 def to_card(str):
     suit_str, value_str = str.split(" ")
     card = Card(None, None)
     match suit_str:
-        case "C":
+        case "clubs":
             card.suit = CLUBS
-        case "D":
+        case "diamonds":
             card.suit = DIAMONDS
-        case "H":
+        case "hearts":
             card.suit = HEARTS
-        case "S":
+        case "spades":
             card.suit = SPADES
     card.value = value_str
     return card

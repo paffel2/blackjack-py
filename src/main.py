@@ -22,11 +22,11 @@ def resource_path(relative):
 
 
 class PlayUI:
-    def __init__(self, width, height):
+    def __init__(self, loaded_game=Game()):
         self.scene = pygame.Surface((SCREEN_WIDTH, SCRENN_HEIGHT))
         self.scene.fill(pygame.Color(TABLE_COLOR))
 
-        self.manager = pygame_gui.UIManager((width, height))
+        self.manager = pygame_gui.UIManager((SCREEN_WIDTH, SCRENN_HEIGHT))
         self.main_menu_button = pygame_gui.elements.UIButton(
             relative_rect=pygame.Rect((0, 700), (100, 50)),
             text="Main menu",
@@ -37,7 +37,6 @@ class PlayUI:
             text="Save game",
             manager=self.manager,
         )
-        self.save_game_button.disable()
         self.start_game_button = pygame_gui.elements.UIButton(
             relative_rect=pygame.Rect((200, 750), (150, 50)),
             text="Start game",
@@ -48,27 +47,27 @@ class PlayUI:
             text="Open cards",
             manager=self.manager,
         )
-        self.open_cards_button.disable()
+        # self.open_cards_button.disable()
         self.more_cards_button = pygame_gui.elements.UIButton(
             relative_rect=pygame.Rect((500, 750), (150, 50)),
             text="More cards",
             manager=self.manager,
         )
-        self.more_cards_button.disable()
+        # self.more_cards_button.disable()
         self.bet_button = pygame_gui.elements.UIButton(
             relative_rect=pygame.Rect((650, 750), (150, 50)),
             text="Bet",
             manager=self.manager,
         )
-        self.bet_button.disable()
+        # self.bet_button.disable()
         self.add_bet_button = pygame_gui.elements.UIButton(
             relative_rect=pygame.Rect((800, 750), (150, 50)),
             text="Add bet",
             manager=self.manager,
         )
-        self.add_bet_button.disable()
+        # self.add_bet_button.disable()
 
-        self.game = Game()
+        self.game = loaded_game
         self.font_of_message = pygame.font.Font(None, 36)
         self.wallet_value_text = self.font_of_message.render(
             f"wallet: {self.game.wallet}", 1, (0, 0, 0)
@@ -80,6 +79,28 @@ class PlayUI:
             f"bid: {self.game.bid}", 1, (0, 0, 0)
         )
 
+        match self.game.game_status:
+            case "GAME_STARTED":  # возможно статусы нужно засунуть в класс
+                self.start_game_button.disable()
+                self.more_cards_button.disable()
+                self.open_cards_button.disable()
+                self.bet_button.enable()
+                self.add_bet_button.enable()
+
+            case "GAME_IN_PROGRESS":
+                self.start_game_button.disable()
+                self.more_cards_button.enable()
+                self.open_cards_button.enable()
+                self.bet_button.disable()
+                self.add_bet_button.disable()
+
+            case _:
+                self.start_game_button.enable()
+                self.more_cards_button.disable()
+                self.open_cards_button.disable()
+                self.bet_button.disable()
+                self.add_bet_button.disable()
+
         self.hand_border = pygame.Surface((938, 170))
         self.hand_border.fill(pygame.Color(TABLE_COLOR))
         pygame.draw.rect(self.hand_border, (0, 0, 0), pygame.Rect(0, 0, 938, 170), 2)
@@ -88,6 +109,7 @@ class PlayUI:
         self.hand_border.blit(self.hand_surface, (5, 5))
         self.cards_surfaces = []
         self.clock = pygame.time.Clock()
+        self.add_list_of_surfaces()
 
     def update_money(self):
         self.wallet_value_text = self.font_of_message.render(
@@ -149,12 +171,15 @@ class GameVisual(object):
         pygame.display.set_icon(self.__icon)
         self.clock = pygame.time.Clock()
 
-    def play_game(self):
-        ui = PlayUI(SCREEN_WIDTH, SCRENN_HEIGHT)
+    def play_game(self, loaded_game=Game()):
+        ui = PlayUI(loaded_game)
         run = True
         while run:
             for event in pygame.event.get():
                 match event.type:
+                    case 9:
+                        ui.game.save_game()
+                        pygame.quit()
                     case pygame_gui.UI_BUTTON_PRESSED:
                         match event.ui_element:
                             case ui.main_menu_button:
@@ -164,9 +189,12 @@ class GameVisual(object):
                                 ui.start_game_button.disable()
                                 ui.add_bet_button.enable()
                                 ui.bet_button.enable()
+                                ui.game.game_status = STATUS_STARTED  # перенести в класс Game, там все отрефакторить
+                                ui.game.save_game()  # ВОЗМОЖНО ТОЖЕ СТОИТ перенести вызов внутри функций класса
                             case ui.add_bet_button:
                                 ui.game.bid_more()
                                 ui.update_money()
+                                ui.game.save_game()
                             case ui.bet_button:
                                 try:
                                     ui.game.bet()
@@ -174,12 +202,13 @@ class GameVisual(object):
                                     ui.bet_button.disable()
                                     ui.open_cards_button.enable()
                                     ui.more_cards_button.enable()
-                                    ui.game.shuffleDeck()
+                                    # ui.game.shuffleDeck()
                                     ui.game.moreCards()
                                     ui.game.moreCards()
                                     ui.update_money()
                                     ui.add_list_of_surfaces()
-
+                                    ui.game.game_status = STATUS_IN_PROGRESS  # перенести в класс Game, там все отрефакторить
+                                    ui.game.save_game()
                                     print(ui.game.__str__())
                                 except EmptyBet as e:
                                     print(f"{e} {e.message}")
@@ -191,6 +220,7 @@ class GameVisual(object):
                                 try:
                                     ui.game.moreCards()
                                     ui.add_last_card()
+                                    ui.game.save_game()
                                     print(list_to_string(ui.game.hand))
                                 except ToMuchCards as e:
                                     print(e.message)
@@ -204,6 +234,9 @@ class GameVisual(object):
                                 ui.update_money()
                                 print(ui.game.__str__())
                                 ui.game.nextGame()
+                                ui.game.save_game()
+                            case ui.save_game_button:
+                                ui.game.save_game()
 
                 ui.manager.process_events(event)
 
@@ -255,11 +288,10 @@ class GameVisual(object):
                         elif event.ui_element == new_game_button:
                             self.play_game()
                         elif event.ui_element == load_game_button:
-                            if table_of_results_button.is_enabled:
-                                table_of_results_button.disable()  # just for test disabling buttons
-                            else:
-                                table_of_results_button.enable()
-
+                            loaded_game = load_game()
+                            self.play_game(loaded_game)
+                        elif event.ui_element == table_of_results_button:
+                            pass
                 manager.process_events(event)
             time_delta = clock.tick(60) / 1000
             manager.update(time_delta)

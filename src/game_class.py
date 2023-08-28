@@ -6,6 +6,11 @@ STATUS_STARTED = "GAME_STARTED"
 STATUS_IN_PROGRESS = "GAME_IN_PROGRESS"
 STATUS_ENDED = "GAME_ENDED"
 
+GAME_WIN = "WIN"
+GAME_FAULT = "FAULT"
+GAME_TIE = "TIE"
+GAME_NOT_ENDED = "NOT_ENDED"
+
 
 def list_to_string(list):
     result = "["
@@ -22,10 +27,10 @@ class Game:
         bank=1000000,
         wallet=10000,
         hand=[],
-        deck=[],
+        deck=initDeck(),
         bid=0,
         game_status=STATUS_INIT,
-        game_result="NOT ENDED",
+        game_result=GAME_NOT_ENDED,
     ):
         self.bank = bank
         self.wallet = wallet
@@ -48,7 +53,6 @@ result: {self.game_result} \n
 
     def shuffleDeck(self):
         self.deck = initDeck()
-        self.game_status = "INGAME"
 
     def bid_more(self):
         self.bid += 100
@@ -70,15 +74,15 @@ result: {self.game_result} \n
         elif len(self.deck) > 0:
             next_card = self.deck.pop()
             self.hand.append(next_card)
-            return "DONE"
+            return "DONE"  # рефакторинг
         else:
             return "EMPTY DECK"
 
     def nextGame(self):
         self.hand = []
         self.deck = initDeck()
-        self.game_status = "INIT"
-        self.game_result = "NOT ENDED"
+        self.game_status = STATUS_INIT
+        self.game_result = GAME_NOT_ENDED
 
     def result(self):
         resultValue = 0
@@ -108,19 +112,19 @@ result: {self.game_result} \n
         if resultValue < 21:
             self.wallet += self.bid
             self.bid = 0
-            self.game_status = "ENDED"
-            self.game_result = "PUSH"
+            self.game_status = STATUS_ENDED
+            self.game_result = GAME_TIE
         elif resultValue == 21:
             self.wallet += 2 * self.bid
             self.bank -= self.bid
             self.bid = 0
-            self.game_status = "ENDED"
-            self.game_result = "WIN"
+            self.game_status = STATUS_ENDED
+            self.game_result = GAME_WIN
         else:
             self.bank += self.bid
             self.bid = 0
-            self.game_status = "ENDED"
-            self.game_result = "FAULT"
+            self.game_status = STATUS_ENDED
+            self.game_result = GAME_FAULT
 
     def save_game(self):
         to_save = {
@@ -129,20 +133,25 @@ result: {self.game_result} \n
             "hand": [str(i) for i in self.hand],
             "game_status": self.game_status,
             "game_result": self.game_result,
+            "bid": self.bid,
         }
-        filename = f"saves/save.save"
+        filename = f"./saves/save.save"
         with open(filename, "w") as f:
             json.dump(to_save, f)
         f.close()
 
 
 def load_game():
-    filename = f"saves/save.save"
+    filename = f"./saves/save.save"
     with open(filename) as f:
         readed_dict = json.load(f)
     readed_dict["hand"] = list(map(to_card, readed_dict["hand"]))
     f.close()
-    return Game(**readed_dict)
+    loaded_game = Game(**readed_dict)
+    loaded_game.shuffleDeck()
+    for card in loaded_game.hand:
+        loaded_game.deck.remove(card)
+    return loaded_game
 
 
 class EmptyBet(Exception):
@@ -161,6 +170,7 @@ class ToMuchCards(Exception):
 # a = Game()
 
 # card1 = Card(SPADES, "2")
+# card3 = Card(SPADES, "2")
 # card2 = Card(DIAMONDS, "A")
 # a.hand = [card1, card2]
 
@@ -172,3 +182,5 @@ class ToMuchCards(Exception):
 
 # print(d)
 # print((d.hand[0]))
+
+# print(card1 == card3)
