@@ -33,18 +33,57 @@ class SheetScene:
         )
 
         font_of_message = font.Font(None, 30)
-        texts = ["1000000", "Second", "Third", "Fourth"]  # ПРИМЕР, ДОБАВИТЬ ЧТЕНИЕ CSV
-        list_of_cells = []
-        for text in texts:
-            cell = pygame.Surface((250, 40))
-            cell.fill(pygame.Color(TABLE_COLOR))
-            pygame.draw.rect(cell, (0, 0, 0), Rect(0, 0, 250, 40), 1)
-            render_text = font_of_message.render(text, 1, (0, 0, 0))
-            cell.blit(render_text, (10, 10))
-            list_of_cells.append(cell)
-        row = RowSurface((1000, 40), 249, list_of_cells, TABLE_COLOR)
-        list_of_rows = [row for _ in range(0, 10)]
-        sheet = SheetSurface((1000, 400), 39, list_of_rows, TABLE_COLOR)
+        rows = []
+        with open("./saves/results.csv", "r", newline="") as read_file:
+            fieldnames = ["date", "bet", "result"]
+            results_reader = csv.DictReader(read_file, fieldnames)
+            for row in results_reader:
+                rows.append(row)
+        header_date_cell = pygame.Surface((333, 40))
+        header_bet_cell = pygame.Surface((333, 40))
+        header_result_cell = pygame.Surface((333, 40))
+        header_date_cell.fill(pygame.Color(TABLE_COLOR))
+        header_result_cell.fill(pygame.Color(TABLE_COLOR))
+        header_bet_cell.fill(pygame.Color(TABLE_COLOR))
+        pygame.draw.rect(header_date_cell, (0, 0, 0), Rect(0, 0, 333, 40), 1)
+        pygame.draw.rect(header_bet_cell, (0, 0, 0), Rect(0, 0, 333, 40), 1)
+        pygame.draw.rect(header_result_cell, (0, 0, 0), Rect(0, 0, 333, 40), 1)
+        header_date_render_text = font_of_message.render("Date", 1, (0, 0, 0))
+        header_bet_render_text = font_of_message.render("Bet", 1, (0, 0, 0))
+        header_result_render_text = font_of_message.render("Result", 1, (0, 0, 0))
+        header_date_cell.blit(header_date_render_text, (10, 10))
+        header_bet_cell.blit(header_bet_render_text, (10, 10))
+        header_result_cell.blit(header_result_render_text, (10, 10))
+        header_row = RowSurface(
+            (999, 40),
+            332,
+            [header_date_cell, header_bet_cell, header_result_cell],
+            TABLE_COLOR,
+        )
+        list_of_rows = [header_row]
+        for row in rows:
+            date_cell = pygame.Surface((333, 40))
+            bet_cell = pygame.Surface((333, 40))
+            result_cell = pygame.Surface((333, 40))
+            date_cell.fill(pygame.Color(TABLE_COLOR))
+            result_cell.fill(pygame.Color(TABLE_COLOR))
+            bet_cell.fill(pygame.Color(TABLE_COLOR))
+            pygame.draw.rect(date_cell, (0, 0, 0), Rect(0, 0, 333, 40), 1)
+            pygame.draw.rect(result_cell, (0, 0, 0), Rect(0, 0, 333, 40), 1)
+            pygame.draw.rect(bet_cell, (0, 0, 0), Rect(0, 0, 333, 40), 1)
+            date_render_text = font_of_message.render(row["date"], 1, (0, 0, 0))
+            bet_render_text = font_of_message.render(row["bet"], 1, (0, 0, 0))
+            result_render_text = font_of_message.render(row["result"], 1, (0, 0, 0))
+            date_cell.blit(date_render_text, (10, 10))
+            bet_cell.blit(bet_render_text, (10, 10))
+            result_cell.blit(result_render_text, (10, 10))
+
+            row = RowSurface(
+                (999, 40), 332, [date_cell, bet_cell, result_cell], TABLE_COLOR
+            )
+            list_of_rows.append(row)
+
+        sheet = SheetSurface((999, 440), 39, list_of_rows, TABLE_COLOR)
 
         self.scene.blit(sheet, (100, 200))
 
