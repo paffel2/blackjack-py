@@ -2,6 +2,7 @@ from cards import *
 import json
 import csv
 from datetime import date
+from common import *
 
 STATUS_INIT = "GAME_INIT"
 STATUS_STARTED = "GAME_STARTED"
@@ -87,16 +88,31 @@ result: {self.game_result} \n
         self.game_status = STATUS_INIT
         self.game_result = GAME_NOT_ENDED
 
-    def add_result_to_table(self):
+    def recalculate_score(self):
+        win, tie, fault = 0, 0, 0
+        with open("./saves/score.csv", "r") as score_file:
+            win, tie, fault = [int(i) for i in score_file.readline().split(",")]
+        match self.game_result:
+            case "WIN":
+                win += 1
+            case "FAULT":
+                fault += 1
+            case "TIE":
+                tie += 1
+        with open("./saves/score.csv", "w") as score_file:
+            score_file.write(f"{win},{tie},{fault}")
+        return (
+            f"{self.game_result}. Statistic: win - {win}; tie - {tie}; fault - {fault}"
+        )
+
+    def add_result_to_history(self):
         list_of_results = []
-        with open("./saves/results.csv", "r", newline="") as read_file:
-            fieldnames = ["date", "bet", "result"]
-            results_reader = csv.DictReader(read_file, fieldnames)
-            for row in results_reader:
-                list_of_results.append(row)
-            print(list_of_results)
+        read_csv_to_list(list_of_results)
+        print(list_of_results)
         with open("./saves/results.csv", "w", newline="") as csvfile:
-            result_writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
+            result_writer = csv.DictWriter(
+                csvfile, fieldnames=["date", "bet", "result"]
+            )
             current_date = str(date.today())
             bet = str(self.bid)
             result = self.game_result
@@ -148,7 +164,8 @@ result: {self.game_result} \n
             # self.bid = 0
             self.game_status = STATUS_ENDED
             self.game_result = GAME_FAULT
-        self.add_result_to_table()
+        self.add_result_to_history()
+        self.recalculate_score()
 
     def save_game(self):
         to_save = {

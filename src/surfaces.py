@@ -18,6 +18,18 @@ class HandSurface(Surface):
 
 
 ######################################### TABLE SURFACE #############################
+
+
+class CellSurface(Surface):
+    def __init__(self, size, background_color, font, text):
+        Surface.__init__(self, size)
+        self.background_color = background_color
+        self.fill(self.background_color)
+        draw.rect(self, (0, 0, 0), Rect(0, 0, size[0], size[1]), 1)
+        self.render_text = font.render(text, 1, (0, 0, 0))
+        self.blit(self.render_text, (10, 10))
+
+
 class RowSurface(Surface):
     def __init__(self, size, step, list_of_cells, background_color):
         Surface.__init__(self, size)

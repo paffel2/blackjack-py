@@ -4,6 +4,7 @@ import sys
 import os
 from game_class import *
 from surfaces import *
+from common import *
 
 
 TABLE_COLOR = [0, 186, 143]
@@ -13,6 +14,8 @@ background = pygame.Surface((SCREEN_WIDTH, SCRENN_HEIGHT))
 background.fill(pygame.Color(TABLE_COLOR))
 zero_position = (0, 0)
 clock = pygame.time.Clock()
+TIME_DELTA = clock.tick(60) / 1000
+BLACK_COLOR = (0, 0, 0)
 
 
 def resource_path(relative):
@@ -33,27 +36,15 @@ class SheetScene:
         )
 
         font_of_message = font.Font(None, 30)
+
+        def create_cell(text):
+            return CellSurface((333, 40), TABLE_COLOR, font_of_message, text)
+
         rows = []
-        with open("./saves/results.csv", "r", newline="") as read_file:
-            fieldnames = ["date", "bet", "result"]
-            results_reader = csv.DictReader(read_file, fieldnames)
-            for row in results_reader:
-                rows.append(row)
-        header_date_cell = pygame.Surface((333, 40))
-        header_bet_cell = pygame.Surface((333, 40))
-        header_result_cell = pygame.Surface((333, 40))
-        header_date_cell.fill(pygame.Color(TABLE_COLOR))
-        header_result_cell.fill(pygame.Color(TABLE_COLOR))
-        header_bet_cell.fill(pygame.Color(TABLE_COLOR))
-        pygame.draw.rect(header_date_cell, (0, 0, 0), Rect(0, 0, 333, 40), 1)
-        pygame.draw.rect(header_bet_cell, (0, 0, 0), Rect(0, 0, 333, 40), 1)
-        pygame.draw.rect(header_result_cell, (0, 0, 0), Rect(0, 0, 333, 40), 1)
-        header_date_render_text = font_of_message.render("Date", 1, (0, 0, 0))
-        header_bet_render_text = font_of_message.render("Bet", 1, (0, 0, 0))
-        header_result_render_text = font_of_message.render("Result", 1, (0, 0, 0))
-        header_date_cell.blit(header_date_render_text, (10, 10))
-        header_bet_cell.blit(header_bet_render_text, (10, 10))
-        header_result_cell.blit(header_result_render_text, (10, 10))
+        read_csv_to_list(rows)
+        header_date_cell = create_cell("Date")
+        header_bet_cell = create_cell("Bet")
+        header_result_cell = create_cell("Result")
         header_row = RowSurface(
             (999, 40),
             332,
@@ -62,22 +53,9 @@ class SheetScene:
         )
         list_of_rows = [header_row]
         for row in rows:
-            date_cell = pygame.Surface((333, 40))
-            bet_cell = pygame.Surface((333, 40))
-            result_cell = pygame.Surface((333, 40))
-            date_cell.fill(pygame.Color(TABLE_COLOR))
-            result_cell.fill(pygame.Color(TABLE_COLOR))
-            bet_cell.fill(pygame.Color(TABLE_COLOR))
-            pygame.draw.rect(date_cell, (0, 0, 0), Rect(0, 0, 333, 40), 1)
-            pygame.draw.rect(result_cell, (0, 0, 0), Rect(0, 0, 333, 40), 1)
-            pygame.draw.rect(bet_cell, (0, 0, 0), Rect(0, 0, 333, 40), 1)
-            date_render_text = font_of_message.render(row["date"], 1, (0, 0, 0))
-            bet_render_text = font_of_message.render(row["bet"], 1, (0, 0, 0))
-            result_render_text = font_of_message.render(row["result"], 1, (0, 0, 0))
-            date_cell.blit(date_render_text, (10, 10))
-            bet_cell.blit(bet_render_text, (10, 10))
-            result_cell.blit(result_render_text, (10, 10))
-
+            date_cell = create_cell(row["date"])
+            bet_cell = create_cell(row["bet"])
+            result_cell = create_cell(row["result"])
             row = RowSurface(
                 (999, 40), 332, [date_cell, bet_cell, result_cell], TABLE_COLOR
             )
@@ -88,12 +66,23 @@ class SheetScene:
         self.scene.blit(sheet, (100, 200))
 
     def update_scene(self):
-        time_delta = clock.tick(60) / 1000
-        self.manager.update(time_delta)
+        self.manager.update(TIME_DELTA)
         self.manager.draw_ui(self.scene)
 
+    def show_scene(self):
+        run = True
+        for event in pygame.event.get():
+            match event.type:
+                case pygame_gui.UI_BUTTON_PRESSED:
+                    match event.ui_element:
+                        case self.main_menu_button:
+                            run = False
+            self.manager.process_events(event)
+        self.update_scene()
+        return run
 
-class PlayUI:
+
+class GameScene:
     def __init__(self, loaded_game=Game()):
         self.scene = pygame.Surface((SCREEN_WIDTH, SCRENN_HEIGHT))
         self.scene.fill(pygame.Color(TABLE_COLOR))
@@ -138,13 +127,13 @@ class PlayUI:
         self.game = loaded_game
         self.font_of_message = pygame.font.Font(None, 36)
         self.wallet_value_text = self.font_of_message.render(
-            f"wallet: {self.game.wallet}", 1, (0, 0, 0)
+            f"wallet: {self.game.wallet}", 1, BLACK_COLOR
         )
         self.bank_value_text = self.font_of_message.render(
-            f"bank: {self.game.bank}", 1, (0, 0, 0)
+            f"bank: {self.game.bank}", 1, BLACK_COLOR
         )
         self.bid_value_text = self.font_of_message.render(
-            f"bid: {self.game.bid}", 1, (0, 0, 0)
+            f"bid: {self.game.bid}", 1, BLACK_COLOR
         )
 
         match self.game.game_status:
@@ -171,7 +160,7 @@ class PlayUI:
 
         self.hand_border = pygame.Surface((938, 170))
         self.hand_border.fill(pygame.Color(TABLE_COLOR))
-        pygame.draw.rect(self.hand_border, (0, 0, 0), pygame.Rect(0, 0, 938, 170), 2)
+        pygame.draw.rect(self.hand_border, BLACK_COLOR, pygame.Rect(0, 0, 938, 170), 2)
         self.hand_surface = HandSurface((928, 160), TABLE_COLOR)
         self.hand_surface.fill(pygame.Color((TABLE_COLOR)))
         self.hand_border.blit(self.hand_surface, (5, 5))
@@ -181,13 +170,13 @@ class PlayUI:
 
     def update_money(self):
         self.wallet_value_text = self.font_of_message.render(
-            f"wallet: {self.game.wallet}", 1, (0, 0, 0)
+            f"wallet: {self.game.wallet}", 1, BLACK_COLOR
         )
         self.bank_value_text = self.font_of_message.render(
-            f"bank: {self.game.bank}", 1, (0, 0, 0)
+            f"bank: {self.game.bank}", 1, BLACK_COLOR
         )
         self.bid_value_text = self.font_of_message.render(
-            f"bid: {self.game.bid}", 1, (0, 0, 0)
+            f"bid: {self.game.bid}", 1, BLACK_COLOR
         )
 
     def add_and_draw_card_surface(self, card):
@@ -227,7 +216,7 @@ class PlayUI:
         self.manager.draw_ui(self.scene)
 
 
-class GameVisual(object):
+class MainMenuScene:
     def __init__(self):
         self.__CAPTION = "BlackJack"
         icon_path = resource_path(os.path.join("./img/icons", "icon.png"))
@@ -239,8 +228,8 @@ class GameVisual(object):
         pygame.display.set_icon(self.__icon)
         self.clock = pygame.time.Clock()
 
-    def play_game(self, loaded_game=Game()):
-        ui = PlayUI(loaded_game)
+    def play_game(self, loaded_game=Game()):  # Перенести  в класс игровой сцены
+        ui = GameScene(loaded_game)
         run = True
         while run:
             for event in pygame.event.get():
@@ -289,18 +278,16 @@ class GameVisual(object):
                                     ui.game.moreCards()
                                     ui.add_last_card()
                                     ui.game.save_game()
-                                    # print(list_to_string(ui.game.hand))
                                 except ToMuchCards as e:
                                     print(e.message)
                                 except Exception as e:
                                     print(e)
                             case ui.open_cards_button:
-                                ui.game.result()
+                                text = ui.game.result()
                                 ui.start_game_button.enable()
                                 ui.more_cards_button.disable()
                                 ui.open_cards_button.disable()
                                 ui.update_money()
-                                # print(ui.game.__str__())
                                 ui.game.nextGame()
                                 ui.game.save_game()
                             case ui.save_game_button:
@@ -314,16 +301,7 @@ class GameVisual(object):
 
     def table_of_results(self):
         sheet_scene = SheetScene()
-        run = True
-        while run:
-            for event in pygame.event.get():
-                match event.type:
-                    case pygame_gui.UI_BUTTON_PRESSED:
-                        match event.ui_element:
-                            case sheet_scene.main_menu_button:
-                                run = False
-                sheet_scene.manager.process_events(event)
-            sheet_scene.update_scene()
+        while sheet_scene.show_scene():
             self.window_surface.blit(sheet_scene.scene, zero_position)
             pygame.display.update()
 
@@ -387,5 +365,5 @@ class GameVisual(object):
         sys.exit()
 
 
-new_game = GameVisual()
+new_game = MainMenuScene()
 new_game.main_menu()
