@@ -250,7 +250,7 @@ class GameVisual(object):
                                     ui.game.moreCards()
                                     ui.add_last_card()
                                     ui.game.save_game()
-                                    print(list_to_string(ui.game.hand))
+                                    # print(list_to_string(ui.game.hand))
                                 except ToMuchCards as e:
                                     print(e.message)
                                 except Exception as e:
@@ -261,7 +261,7 @@ class GameVisual(object):
                                 ui.more_cards_button.disable()
                                 ui.open_cards_button.disable()
                                 ui.update_money()
-                                print(ui.game.__str__())
+                                # print(ui.game.__str__())
                                 ui.game.nextGame()
                                 ui.game.save_game()
                             case ui.save_game_button:

@@ -88,14 +88,24 @@ result: {self.game_result} \n
         self.game_result = GAME_NOT_ENDED
 
     def add_result_to_table(self):
-        with open("./saves/results.csv", "a", newline="") as csvfile:
+        list_of_results = []
+        with open("./saves/results.csv", "r", newline="") as read_file:
             fieldnames = ["date", "bet", "result"]
+            results_reader = csv.DictReader(read_file, fieldnames)
+            for row in results_reader:
+                list_of_results.append(row)
+            print(list_of_results)
+        with open("./saves/results.csv", "w", newline="") as csvfile:
             result_writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
-            # result_writer.writeheader()
             current_date = str(date.today())
             bet = str(self.bid)
             result = self.game_result
-            result_writer.writerow({"date": current_date, "bet": bet, "result": result})
+            list_of_results.insert(
+                0, {"date": current_date, "bet": bet, "result": result}
+            )
+            if len(list_of_results) == 11:
+                list_of_results.pop()
+            result_writer.writerows(list_of_results)
 
     def result(self):
         resultValue = 0
