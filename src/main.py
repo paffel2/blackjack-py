@@ -137,14 +137,14 @@ class GameScene:
         )
 
         match self.game.game_status:
-            case "GAME_STARTED":
+            case GameStatus.STATUS_STARTED:
                 self.start_game_button.disable()
                 self.more_cards_button.disable()
                 self.open_cards_button.disable()
                 self.bet_button.enable()
                 self.add_bet_button.enable()
 
-            case "GAME_IN_PROGRESS":
+            case GameStatus.STATUS_IN_PROGRESS:
                 self.start_game_button.disable()
                 self.more_cards_button.enable()
                 self.open_cards_button.enable()
@@ -257,14 +257,21 @@ class MainMenuScene:
                                 ui.add_bet_button.enable()
                                 ui.bet_button.enable()
                                 ui.update_money()
-                                ui.game.game_status = STATUS_STARTED  # перенести в класс Game, там все отрефакторить
+                                ui.game.game_status = (
+                                    GameStatus.STATUS_STARTED
+                                )  # перенести в класс Game, там все отрефакторить
                                 ui.game.save_game()  # ВОЗМОЖНО ТОЖЕ СТОИТ перенести вызов внутри функций класса
                                 ui.clean_message_surface()
                             case ui.add_bet_button:
-                                ui.game.bid_more()  # добавить проверку средств в кошельке
-                                ui.update_money()
-                                ui.game.save_game()
-                                ui.clean_message_surface()
+                                try:
+                                    ui.game.bid_more()  # добавить проверку средств в кошельке
+                                    ui.update_money()
+                                    ui.game.save_game()
+                                    ui.clean_message_surface()
+                                except BetMoreThanInWallet as e:
+                                    ui.draw_message(e.message)
+                                except BetMoreThanInBank as e:
+                                    ui.draw_message(e.message)
                             case ui.bet_button:
                                 try:
                                     ui.game.bet()
@@ -276,7 +283,9 @@ class MainMenuScene:
                                     ui.game.moreCards()
                                     ui.update_money()
                                     ui.draw_list_of_surfaces()
-                                    ui.game.game_status = STATUS_IN_PROGRESS  # перенести в класс Game, там все отрефакторить
+                                    ui.game.game_status = (
+                                        GameStatus.STATUS_IN_PROGRESS
+                                    )  # возможно нужен метод для класса Game который управляет ходом игры
                                     ui.game.save_game()
                                     ui.clean_message_surface()
                                 except EmptyBet as e:

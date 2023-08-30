@@ -3,16 +3,21 @@ import json
 import csv
 from datetime import date
 from common import *
+from enum import Enum
 
-STATUS_INIT = "GAME_INIT"
-STATUS_STARTED = "GAME_STARTED"
-STATUS_IN_PROGRESS = "GAME_IN_PROGRESS"
-STATUS_ENDED = "GAME_ENDED"
 
-GAME_WIN = "WIN"
-GAME_FAULT = "FAULT"
-GAME_TIE = "TIE"
-GAME_NOT_ENDED = "NOT_ENDED"
+class GameStatus(Enum):
+    STATUS_INIT = "GAME_INIT"
+    STATUS_STARTED = "GAME_STARTED"
+    STATUS_IN_PROGRESS = "GAME_IN_PROGRESS"
+    STATUS_ENDED = "GAME_ENDED"
+
+
+class GameResult(Enum):
+    GAME_WIN = "WIN"
+    GAME_FAULT = "FAULT"
+    GAME_TIE = "TIE"
+    GAME_NOT_ENDED = "NOT_ENDED"
 
 
 class Game:
@@ -23,8 +28,8 @@ class Game:
         hand=[],
         deck=initDeck(),
         bid=0,
-        game_status=STATUS_INIT,
-        game_result=GAME_NOT_ENDED,
+        game_status=GameStatus.STATUS_INIT,
+        game_result=GameResult.GAME_NOT_ENDED,
     ):
         self.bank = bank
         self.wallet = wallet
@@ -41,7 +46,7 @@ wallet: {self.wallet} \n
 hand: {self.hand} \n
 deck: {self.deck} \n
 bid: {self.bid} \n
-status: {self.game_status} \n
+status: {self.game_status.value} \n
 result: {self.game_result} \n
                 """
 
@@ -49,7 +54,14 @@ result: {self.game_result} \n
         self.deck = initDeck()
 
     def bid_more(self):
-        self.bid += 100
+        if self.bid >= self.wallet:
+            self.bid = 0
+            raise BetMoreThanInWallet
+        if self.bid >= self.bank:
+            self.bid = 0
+            raise BetMoreThanInBank
+        else:
+            self.bid += 100
 
     def bet(self):
         if self.bid == 0:
@@ -73,8 +85,8 @@ result: {self.game_result} \n
         self.hand = []
         self.deck = initDeck()
         self.bid = 0
-        self.game_status = STATUS_INIT
-        self.game_result = GAME_NOT_ENDED
+        self.game_status = GameStatus.STATUS_INIT
+        self.game_result = GameResult.GAME_NOT_ENDED
 
     def recalculate_score(self):
         win, tie, fault = 0, 0, 0
@@ -141,17 +153,15 @@ result: {self.game_result} \n
                     resultValue += 10
         if resultValue < 21:
             self.wallet += self.bid
-            self.game_status = STATUS_ENDED
-            self.game_result = GAME_TIE
+            self.game_result = GameResult.GAME_TIE
         elif resultValue == 21:
             self.wallet += 2 * self.bid
             self.bank -= self.bid
-            self.game_status = STATUS_ENDED
-            self.game_result = GAME_WIN
+            self.game_result = GameResult.GAME_WIN
         else:
             self.bank += self.bid
-            self.game_status = STATUS_ENDED
-            self.game_result = GAME_FAULT
+            self.game_result = GameResult.GAME_FAULT
+        self.game_status = GameStatus.STATUS_ENDED
         self.add_result_to_history()
         return self.recalculate_score()
 
@@ -160,8 +170,8 @@ result: {self.game_result} \n
             "bank": self.bank,
             "wallet": self.wallet,
             "hand": [str(i) for i in self.hand],
-            "game_status": self.game_status,
-            "game_result": self.game_result,
+            "game_status": self.game_status.value,
+            "game_result": self.game_result.value,
             "bid": self.bid,
         }
         filename = f"./saves/save.save"
@@ -198,6 +208,10 @@ class ToMuchCards(Exception):
 
 class EmptyDeck(Exception):
     message = "There are no more cards in the deck"
+
+
+class BetMoreThanInBank(Exception):
+    message = "Too big bet for bank"
 
 
 # test values
