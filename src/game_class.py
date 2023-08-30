@@ -106,9 +106,7 @@ result: {self.game_result} \n
                 tie += 1
         with open("./saves/score.csv", "w") as score_file:
             score_file.write(f"{win},{tie},{fault}")
-        return (
-            f"{self.game_result}. Statistic: win - {win}; tie - {tie}; fault - {fault}"
-        )
+        return f"{self.game_result.value}. Statistic: win - {win}; tie - {tie}; fault - {fault}"
 
     def add_result_to_history(self):
         list_of_results = []
@@ -121,7 +119,7 @@ result: {self.game_result} \n
             bet = str(self.bid)
             result = self.game_result
             list_of_results.insert(
-                0, {"date": current_date, "bet": bet, "result": result}
+                0, {"date": current_date, "bet": bet, "result": result.value}
             )
             if len(list_of_results) == 11:
                 list_of_results.pop()
@@ -165,7 +163,7 @@ result: {self.game_result} \n
         self.add_result_to_history()
         return self.recalculate_score()
 
-    def save_game(self):
+    def save_game(self):  # вынести все функции связанные с работой файлов отдельно
         to_save = {
             "bank": self.bank,
             "wallet": self.wallet,
