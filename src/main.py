@@ -137,7 +137,7 @@ class GameScene:
         )
 
         match self.game.game_status:
-            case "GAME_STARTED":  # возможно статусы нужно засунуть в класс
+            case "GAME_STARTED":
                 self.start_game_button.disable()
                 self.more_cards_button.disable()
                 self.open_cards_button.disable()

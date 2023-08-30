@@ -15,15 +15,6 @@ GAME_TIE = "TIE"
 GAME_NOT_ENDED = "NOT_ENDED"
 
 
-def list_to_string(list):
-    result = "["
-    for i in list:
-        a = i.__str__() + ", "
-        result += a
-    result += "]"
-    return result
-
-
 class Game:
     def __init__(
         self,
@@ -47,8 +38,8 @@ class Game:
         return f""" GAME:
 bank: {self.bank} \n  
 wallet: {self.wallet} \n
-hand: {list_to_string(self.hand)} \n
-deck: {list_to_string(self.deck)} \n
+hand: {self.hand} \n
+deck: {self.deck} \n
 bid: {self.bid} \n
 status: {self.game_status} \n
 result: {self.game_result} \n
@@ -128,23 +119,23 @@ result: {self.game_result} \n
         resultValue = 0
         for i in self.hand:
             match i.value:
-                case "2":
+                case CardValue.TWO:
                     resultValue += 2
-                case "3":
+                case CardValue.THREE:
                     resultValue += 3
-                case "4":
+                case CardValue.FOUR:
                     resultValue += 4
-                case "5":
+                case CardValue.FIVE:
                     resultValue += 5
-                case "6":
+                case CardValue.SIX:
                     resultValue += 6
-                case "7":
+                case CardValue.SEVEN:
                     resultValue += 7
-                case "8":
+                case CardValue.EIGHT:
                     resultValue += 8
-                case "9":
+                case CardValue.NINE:
                     resultValue += 9
-                case "A":
+                case CardValue.ACE:
                     resultValue += 11
                 case _:
                     resultValue += 10
@@ -176,15 +167,16 @@ result: {self.game_result} \n
         filename = f"./saves/save.save"
         with open(filename, "w") as f:
             json.dump(to_save, f)
-        f.close()
 
 
 def load_game():
     filename = f"./saves/save.save"
-    with open(filename) as f:
-        readed_dict = json.load(f)
+    try:
+        with open(filename) as f:
+            readed_dict = json.load(f)
+    except FileNotFoundError:
+        return Game()
     readed_dict["hand"] = list(map(to_card, readed_dict["hand"]))
-    f.close()
     loaded_game = Game(**readed_dict)
     loaded_game.shuffleDeck()
     for card in loaded_game.hand:
@@ -211,10 +203,12 @@ class EmptyDeck(Exception):
 # test values
 # a = Game()
 
-# card1 = Card(SPADES, "2")
+# card1 = Card(Suit.SPADES, CardValue.TWO)
 # card3 = Card(SPADES, "2")
-# card2 = Card(DIAMONDS, "A")
+# card2 = Card(Suit.DIAMONDS, CardValue.ACE)
 # a.hand = [card1, card2]
+
+# a.deck = []
 
 # print(a)
 # a.save_game()
@@ -226,3 +220,6 @@ class EmptyDeck(Exception):
 # print((d.hand[0]))
 
 # print(card1 == card3)
+
+
+# print(123)
