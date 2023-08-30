@@ -150,22 +150,19 @@ result: {self.game_result} \n
         print(f"result_value: {resultValue}")
         if resultValue < 21:
             self.wallet += self.bid
-            # self.bid = 0
             self.game_status = STATUS_ENDED
             self.game_result = GAME_TIE
         elif resultValue == 21:
             self.wallet += 2 * self.bid
             self.bank -= self.bid
-            # self.bid = 0
             self.game_status = STATUS_ENDED
             self.game_result = GAME_WIN
         else:
             self.bank += self.bid
-            # self.bid = 0
             self.game_status = STATUS_ENDED
             self.game_result = GAME_FAULT
         self.add_result_to_history()
-        self.recalculate_score()
+        return self.recalculate_score()
 
     def save_game(self):
         to_save = {

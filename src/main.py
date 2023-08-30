@@ -166,7 +166,17 @@ class GameScene:
         self.hand_border.blit(self.hand_surface, (5, 5))
         self.cards_surfaces = []
         self.clock = pygame.time.Clock()
-        self.add_list_of_surfaces()
+        self.draw_list_of_surfaces()
+        self.message_surface = Surface((800, 200))
+        self.message_surface.fill(pygame.Color(255, 160, 122))  # TABLE_COLOR
+
+    def draw_message(self, text):
+        render_text = self.font_of_message.render(text, 1, BLACK_COLOR)
+        self.message_surface.blit(render_text, (100, 70))
+        print("TEXT ADDED")
+
+    def clean_message_surface(self):
+        self.message_surface.fill(pygame.Color(255, 160, 122))
 
     def update_money(self):
         self.wallet_value_text = self.font_of_message.render(
@@ -179,7 +189,7 @@ class GameScene:
             f"bid: {self.game.bid}", 1, BLACK_COLOR
         )
 
-    def add_and_draw_card_surface(self, card):
+    def draw_card_surface(self, card):
         card_image = read_card(card)
         card_image = pygame.transform.scale(card_image, (116, 160))
         card_surface = pygame.Surface((116, 160))
@@ -189,13 +199,13 @@ class GameScene:
         self.hand_border.blit(self.hand_surface, (5, 5))
         self.cards_surfaces.append(card_surface)
 
-    def add_list_of_surfaces(self):
+    def draw_list_of_surfaces(self):
         for card in self.game.hand:
-            self.add_and_draw_card_surface(card)
+            self.draw_card_surface(card)
 
-    def add_last_card(self):
+    def draw_last_card(self):
         card = self.game.hand[-1]
-        self.add_and_draw_card_surface(card)
+        self.draw_card_surface(card)
 
     def clean_table(self):
         self.hand_surface.clean_hand()
@@ -212,7 +222,8 @@ class GameScene:
         self.scene.blit(self.bank_value_text, (10, 10))
         self.scene.blit(self.wallet_value_text, (200, 10))
         self.scene.blit(self.bid_value_text, (400, 10))
-        self.scene.blit(self.hand_border, (90, 500))
+        self.scene.blit(self.hand_border, (131, 500))
+        self.scene.blit(self.message_surface, (200, 200))
         self.manager.draw_ui(self.scene)
 
 
@@ -249,10 +260,12 @@ class MainMenuScene:
                                 ui.update_money()
                                 ui.game.game_status = STATUS_STARTED  # перенести в класс Game, там все отрефакторить
                                 ui.game.save_game()  # ВОЗМОЖНО ТОЖЕ СТОИТ перенести вызов внутри функций класса
+                                ui.clean_message_surface()
                             case ui.add_bet_button:
-                                ui.game.bid_more()
+                                ui.game.bid_more()  # добавить проверку средств в кошельке
                                 ui.update_money()
                                 ui.game.save_game()
+                                ui.clean_message_surface()
                             case ui.bet_button:
                                 try:
                                     ui.game.bet()
@@ -263,33 +276,36 @@ class MainMenuScene:
                                     ui.game.moreCards()
                                     ui.game.moreCards()
                                     ui.update_money()
-                                    ui.add_list_of_surfaces()
+                                    ui.draw_list_of_surfaces()
                                     ui.game.game_status = STATUS_IN_PROGRESS  # перенести в класс Game, там все отрефакторить
                                     ui.game.save_game()
+                                    ui.clean_message_surface()
                                     print(ui.game.__str__())
                                 except EmptyBet as e:
-                                    print(f"{e} {e.message}")
+                                    ui.draw_message("Empty bet")
                                 except BetMoreThanInWallet as e:
-                                    print(f"{e} {e.message}")
+                                    ui.draw_message("Insufficient funds")
                                 except Exception as e:
-                                    print(e)
+                                    ui.draw_message(str(e))
                             case ui.more_cards_button:
                                 try:
                                     ui.game.moreCards()
-                                    ui.add_last_card()
+                                    ui.draw_last_card()
                                     ui.game.save_game()
+                                    ui.clean_message_surface()
                                 except ToMuchCards as e:
-                                    print(e.message)
+                                    ui.draw_message("You don't need more cards")
                                 except Exception as e:
-                                    print(e)
+                                    ui.draw_message(str(e))
                             case ui.open_cards_button:
-                                text = ui.game.result()
+                                result = ui.game.result()
                                 ui.start_game_button.enable()
                                 ui.more_cards_button.disable()
                                 ui.open_cards_button.disable()
                                 ui.update_money()
                                 ui.game.nextGame()
                                 ui.game.save_game()
+                                ui.draw_message(result)
                             case ui.save_game_button:
                                 ui.game.save_game()
 
