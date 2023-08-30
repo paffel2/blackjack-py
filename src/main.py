@@ -173,7 +173,6 @@ class GameScene:
     def draw_message(self, text):
         render_text = self.font_of_message.render(text, 1, BLACK_COLOR)
         self.message_surface.blit(render_text, (100, 70))
-        print("TEXT ADDED")
 
     def clean_message_surface(self):
         self.message_surface.fill(pygame.Color(255, 160, 122))
@@ -280,11 +279,10 @@ class MainMenuScene:
                                     ui.game.game_status = STATUS_IN_PROGRESS  # перенести в класс Game, там все отрефакторить
                                     ui.game.save_game()
                                     ui.clean_message_surface()
-                                    print(ui.game.__str__())
                                 except EmptyBet as e:
-                                    ui.draw_message("Empty bet")
+                                    ui.draw_message(e.message)
                                 except BetMoreThanInWallet as e:
-                                    ui.draw_message("Insufficient funds")
+                                    ui.draw_message(e.message)
                                 except Exception as e:
                                     ui.draw_message(str(e))
                             case ui.more_cards_button:
@@ -294,7 +292,7 @@ class MainMenuScene:
                                     ui.game.save_game()
                                     ui.clean_message_surface()
                                 except ToMuchCards as e:
-                                    ui.draw_message("You don't need more cards")
+                                    ui.draw_message(e.message)
                                 except Exception as e:
                                     ui.draw_message(str(e))
                             case ui.open_cards_button:

@@ -59,14 +59,12 @@ result: {self.game_result} \n
 
     def bid_more(self):
         self.bid += 100
-        print(f"CURRENT BID {self.bid}")
 
     def bet(self):
         if self.bid == 0:
             raise EmptyBet
         if self.bank >= self.bid <= self.wallet:
             self.wallet -= self.bid
-            print(f"BET {self.bid}")
         else:
             self.bid = 0
             raise BetMoreThanInWallet
@@ -77,9 +75,8 @@ result: {self.game_result} \n
         elif len(self.deck) > 0:
             next_card = self.deck.pop()
             self.hand.append(next_card)
-            return "DONE"  # рефакторинг
         else:
-            return "EMPTY DECK"
+            raise EmptyDeck
 
     def nextGame(self):
         self.hand = []
@@ -90,8 +87,13 @@ result: {self.game_result} \n
 
     def recalculate_score(self):
         win, tie, fault = 0, 0, 0
-        with open("./saves/score.csv", "r") as score_file:
-            win, tie, fault = [int(i) for i in score_file.readline().split(",")]
+        try:
+            with open("./saves/score.csv", "r") as score_file:
+                win, tie, fault = [int(i) for i in score_file.readline().split(",")]
+        except FileNotFoundError:
+            pass
+        except ValueError:
+            pass
         match self.game_result:
             case "WIN":
                 win += 1
@@ -108,7 +110,6 @@ result: {self.game_result} \n
     def add_result_to_history(self):
         list_of_results = []
         read_csv_to_list(list_of_results)
-        print(list_of_results)
         with open("./saves/results.csv", "w", newline="") as csvfile:
             result_writer = csv.DictWriter(
                 csvfile, fieldnames=["date", "bet", "result"]
@@ -147,7 +148,6 @@ result: {self.game_result} \n
                     resultValue += 11
                 case _:
                     resultValue += 10
-        print(f"result_value: {resultValue}")
         if resultValue < 21:
             self.wallet += self.bid
             self.game_status = STATUS_ENDED
@@ -193,15 +193,19 @@ def load_game():
 
 
 class EmptyBet(Exception):
-    message = "Empty BET"
+    message = "Empty bet"
 
 
 class BetMoreThanInWallet(Exception):
-    message = "Empty BET"
+    message = "Too big bet for your wallet"
 
 
 class ToMuchCards(Exception):
-    message = "I don't need more cards"
+    message = "You don't need more cards"
+
+
+class EmptyDeck(Exception):
+    message = "There are no more cards in the deck"
 
 
 # test values
