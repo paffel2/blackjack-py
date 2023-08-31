@@ -1,9 +1,9 @@
 import pygame
 import pygame_gui
-from .constants import *
-from .surfaces import *
-from .game_class import *
-from .exceptions import *
+from constants import *
+from surfaces import *
+from game_class import *
+from exceptions import *
 
 
 class GameScene:
@@ -162,6 +162,7 @@ class GameScene:
                                 run = False
                             case self.start_game_button:
                                 self.clean_table()
+                                self.game.shuffleDeck()
                                 self.start_game_button.disable()
                                 self.add_bet_button.enable()
                                 self.bet_button.enable()

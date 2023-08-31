@@ -2,7 +2,7 @@ from random import shuffle
 import pygame
 import os
 from enum import Enum
-from .common import *
+from common import *
 
 
 class Suit(Enum):

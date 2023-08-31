@@ -1,9 +1,9 @@
-from .cards import *
+from cards import *
 import json
 import csv
-from .exceptions import *
+from exceptions import *
 from datetime import date
-from .common import *
+from common import *
 from enum import Enum
 
 
@@ -27,7 +27,7 @@ class Game:
         bank=1000000,
         wallet=10000,
         hand=[],
-        deck=initDeck(),
+        deck=[],
         bid=0,
         game_status=GameStatus.STATUS_INIT,
         game_result=GameResult.GAME_NOT_ENDED,
@@ -39,6 +39,19 @@ class Game:
         self.bid = bid
         self.game_status = game_status
         self.game_result = game_result
+
+    def __eq__(self, other):
+        if isinstance(other, Game):
+            return (
+                self.bank == other.bank
+                and self.wallet == other.wallet
+                and self.hand == other.hand
+                and self.deck == other.deck
+                and self.bid == other.bid
+                and self.game_status == other.game_status
+                and self.game_result == other.game_result
+            )
+        return NotImplemented
 
     def __str__(self) -> str:
         return f""" GAME:
@@ -77,14 +90,14 @@ result: {self.game_result} \n
         if len(self.hand) == 8:
             raise ToMuchCards
         elif len(self.deck) > 0:
-            next_card = self.deck.pop()
+            next_card = self.deck.pop(0)
             self.hand.append(next_card)
         else:
             raise EmptyDeck
 
     def nextGame(self):
         self.hand = []
-        self.deck = initDeck()
+        self.deck = []
         self.bid = 0
         self.game_status = GameStatus.STATUS_INIT
         self.game_result = GameResult.GAME_NOT_ENDED
