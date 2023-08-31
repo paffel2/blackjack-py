@@ -1,8 +1,9 @@
-from cards import *
+from .cards import *
 import json
 import csv
+from .exceptions import *
 from datetime import date
-from common import *
+from .common import *
 from enum import Enum
 
 
@@ -88,43 +89,6 @@ result: {self.game_result} \n
         self.game_status = GameStatus.STATUS_INIT
         self.game_result = GameResult.GAME_NOT_ENDED
 
-    def recalculate_score(self):
-        win, tie, fault = 0, 0, 0
-        try:
-            with open("./saves/score.csv", "r") as score_file:
-                win, tie, fault = [int(i) for i in score_file.readline().split(",")]
-        except FileNotFoundError:
-            pass
-        except ValueError:
-            pass
-        match self.game_result:
-            case "WIN":
-                win += 1
-            case "FAULT":
-                fault += 1
-            case "TIE":
-                tie += 1
-        with open("./saves/score.csv", "w") as score_file:
-            score_file.write(f"{win},{tie},{fault}")
-        return f"{self.game_result.value}. Statistic: win - {win}; tie - {tie}; fault - {fault}"
-
-    def add_result_to_history(self):
-        list_of_results = []
-        read_csv_to_list(list_of_results)
-        with open("./saves/results.csv", "w", newline="") as csvfile:
-            result_writer = csv.DictWriter(
-                csvfile, fieldnames=["date", "bet", "result"]
-            )
-            current_date = str(date.today())
-            bet = str(self.bid)
-            result = self.game_result
-            list_of_results.insert(
-                0, {"date": current_date, "bet": bet, "result": result.value}
-            )
-            if len(list_of_results) == 11:
-                list_of_results.pop()
-            result_writer.writerows(list_of_results)
-
     def result(self):
         resultValue = 0
         for i in self.hand:
@@ -160,21 +124,6 @@ result: {self.game_result} \n
             self.bank += self.bid
             self.game_result = GameResult.GAME_FAULT
         self.game_status = GameStatus.STATUS_ENDED
-        self.add_result_to_history()
-        return self.recalculate_score()
-
-    def save_game(self):  # вынести все функции связанные с работой файлов отдельно
-        to_save = {
-            "bank": self.bank,
-            "wallet": self.wallet,
-            "hand": [str(i) for i in self.hand],
-            "game_status": self.game_status.value,
-            "game_result": self.game_result.value,
-            "bid": self.bid,
-        }
-        filename = f"./saves/save.save"
-        with open(filename, "w") as f:
-            json.dump(to_save, f)
 
 
 def load_game():
@@ -192,46 +141,54 @@ def load_game():
     return loaded_game
 
 
-class EmptyBet(Exception):
-    message = "Empty bet"
+def recalculate_score(game):
+    win, tie, fault = 0, 0, 0
+    try:
+        with open("./saves/score.csv", "r") as score_file:
+            win, tie, fault = [int(i) for i in score_file.readline().split(",")]
+    except FileNotFoundError:
+        print("File not found")
+        pass
+    except ValueError:
+        print("Value error")
+        pass
+    match game.game_result:
+        case GameResult.GAME_WIN:
+            win += 1
+        case GameResult.GAME_FAULT:
+            fault += 1
+        case GameResult.GAME_TIE:
+            tie += 1
+    with open("./saves/score.csv", "w") as score_file:
+        score_file.write(f"{win},{tie},{fault}")
+    return f"{game.game_result.value}. Statistic: win - {win}; tie - {tie}; fault - {fault}"
 
 
-class BetMoreThanInWallet(Exception):
-    message = "Too big bet for your wallet"
+def add_result_to_history(game):
+    list_of_results = []
+    read_csv_to_list(list_of_results)
+    with open("./saves/results.csv", "w", newline="") as csvfile:
+        result_writer = csv.DictWriter(csvfile, fieldnames=["date", "bet", "result"])
+        current_date = str(date.today())
+        bet = str(game.bid)
+        result = game.game_result
+        list_of_results.insert(
+            0, {"date": current_date, "bet": bet, "result": result.value}
+        )
+        if len(list_of_results) == 11:
+            list_of_results.pop()
+        result_writer.writerows(list_of_results)
 
 
-class ToMuchCards(Exception):
-    message = "You don't need more cards"
-
-
-class EmptyDeck(Exception):
-    message = "There are no more cards in the deck"
-
-
-class BetMoreThanInBank(Exception):
-    message = "Too big bet for bank"
-
-
-# test values
-# a = Game()
-
-# card1 = Card(Suit.SPADES, CardValue.TWO)
-# card3 = Card(SPADES, "2")
-# card2 = Card(Suit.DIAMONDS, CardValue.ACE)
-# a.hand = [card1, card2]
-
-# a.deck = []
-
-# print(a)
-# a.save_game()
-
-
-# d = load_game()
-
-# print(d)
-# print((d.hand[0]))
-
-# print(card1 == card3)
-
-
-# print(123)
+def save_game(game):
+    to_save = {
+        "bank": game.bank,
+        "wallet": game.wallet,
+        "hand": [str(i) for i in game.hand],
+        "game_status": game.game_status.value,
+        "game_result": game.game_result.value,
+        "bid": game.bid,
+    }
+    filename = f"./saves/save.save"
+    with open(filename, "w") as f:
+        json.dump(to_save, f)

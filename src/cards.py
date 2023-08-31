@@ -1,8 +1,8 @@
 from random import shuffle
 import pygame
-import sys
 import os
 from enum import Enum
+from .common import *
 
 
 class Suit(Enum):
@@ -57,12 +57,6 @@ def initDeck():
             tempList.append(Card(i, j))
     shuffle(tempList)
     return tempList
-
-
-def resource_path(relative):
-    if hasattr(sys, "_MEIPASS"):
-        return os.path.join(sys._MEIPASS, relative)
-    return os.path.join(relative)
 
 
 def read_card(card: Card):

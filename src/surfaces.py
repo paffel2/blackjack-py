@@ -17,9 +17,6 @@ class HandSurface(Surface):
         self.last_position = 0
 
 
-######################################### TABLE SURFACE #############################
-
-
 class CellSurface(Surface):
     def __init__(self, size, background_color, font, text):
         Surface.__init__(self, size)

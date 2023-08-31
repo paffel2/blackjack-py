@@ -1,8 +1,8 @@
 import pygame
 import pygame_gui
-import constants
-import common
-import game_class
+from .constants import *
+from .common import *
+from .game_class import *
 import sys
 import os
 from .game_scene import GameScene
@@ -12,33 +12,29 @@ from .sheet_scene import SheetScene
 class MainMenuScene:
     def __init__(self):
         self.__CAPTION = "BlackJack"
-        icon_path = common.resource_path(os.path.join("./img/icons", "icon.png"))
+        icon_path = resource_path(os.path.join("./img/icons", "icon.png"))
         self.__icon = pygame.image.load(icon_path)
         pygame.init()
 
         pygame.display.set_caption(self.__CAPTION)
-        self.window_surface = pygame.display.set_mode(
-            (constants.SCREEN_WIDTH, constants.SCREEN_HEIGHT)
-        )
+        self.window_surface = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
         pygame.display.set_icon(self.__icon)
         self.clock = pygame.time.Clock()
 
-    def play_game(self, loaded_game=game_class.Game()):
+    def play_game(self, loaded_game=Game()):
         game_scene = GameScene(loaded_game)
         while game_scene.play_game():
-            self.window_surface.blit(game_scene.scene, constants.ZERO_POSITION)
+            self.window_surface.blit(game_scene.scene, ZERO_POSITION)
             pygame.display.update()
 
     def table_of_results(self):
         sheet_scene = SheetScene()
         while sheet_scene.show_scene():
-            self.window_surface.blit(sheet_scene.scene, constants.ZERO_POSITION)
+            self.window_surface.blit(sheet_scene.scene, ZERO_POSITION)
             pygame.display.update()
 
     def main_menu(self):
-        manager = pygame_gui.UIManager(
-            (constants.SCREEN_WIDTH, constants.SCREEN_HEIGHT)
-        )
+        manager = pygame_gui.UIManager((SCREEN_WIDTH, SCREEN_HEIGHT))
         button_size = (400, 50)
 
         new_game_button = pygame_gui.elements.UIButton(
@@ -82,13 +78,13 @@ class MainMenuScene:
                         elif event.ui_element == new_game_button:
                             self.play_game()
                         elif event.ui_element == load_game_button:
-                            loaded_game = game_class.load_game()
+                            loaded_game = load_game()
                             self.play_game(loaded_game)
                         elif event.ui_element == table_of_results_button:
                             self.table_of_results()
                 manager.process_events(event)
-            manager.update(constants.TIME_DELTA)
-            self.window_surface.blit(constants.BACKGROUND, constants.ZERO_POSITION)
+            manager.update(TIME_DELTA)
+            self.window_surface.blit(BACKGROUND, ZERO_POSITION)
             manager.draw_ui(self.window_surface)
 
             pygame.display.update()

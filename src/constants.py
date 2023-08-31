@@ -9,3 +9,4 @@ ZERO_POSITION = (0, 0)
 CLOCK = pygame.time.Clock()
 TIME_DELTA = CLOCK.tick(60) / 1000
 BLACK_COLOR = (0, 0, 0)
+ERROR_COLOR = (255, 0, 0)
