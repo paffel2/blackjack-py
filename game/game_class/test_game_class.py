@@ -1,6 +1,6 @@
-from game_class import *
+from .game_class import *
 import unittest
-from exceptions import *
+from .exceptions import *
 
 
 class TestGameClass(unittest.TestCase):

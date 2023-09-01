@@ -1,9 +1,9 @@
-from cards import *
+from .cards import *
 import json
 import csv
-from exceptions import *
+from .exceptions import *
 from datetime import date
-from common import *
+from .common import *
 from enum import Enum
 
 
@@ -24,11 +24,11 @@ class GameResult(Enum):
 class Game:
     def __init__(
         self,
-        bank=1000000,
-        wallet=10000,
-        hand=[],
-        deck=[],
-        bid=0,
+        bank: int = 1000000,
+        wallet: int = 10000,
+        hand: list[Card] = [],
+        deck: list[Card] = [],
+        bid: int = 0,
         game_status=GameStatus.STATUS_INIT,
         game_result=GameResult.GAME_NOT_ENDED,
     ):
@@ -139,7 +139,7 @@ result: {self.game_result} \n
         self.game_status = GameStatus.STATUS_ENDED
 
 
-def load_game():
+def load_game() -> Game:
     filename = f"./saves/save.save"
     try:
         with open(filename) as f:
@@ -154,7 +154,7 @@ def load_game():
     return loaded_game
 
 
-def recalculate_score(game):
+def recalculate_score(game: Game) -> str:
     win, tie, fault = 0, 0, 0
     try:
         with open("./saves/score.csv", "r") as score_file:
@@ -177,7 +177,7 @@ def recalculate_score(game):
     return f"{game.game_result.value}. Statistic: win - {win}; tie - {tie}; fault - {fault}"
 
 
-def add_result_to_history(game):
+def add_result_to_history(game: Game):
     list_of_results = []
     read_csv_to_list(list_of_results)
     with open("./saves/results.csv", "w", newline="") as csvfile:
@@ -193,7 +193,7 @@ def add_result_to_history(game):
         result_writer.writerows(list_of_results)
 
 
-def save_game(game):
+def save_game(game: Game):
     to_save = {
         "bank": game.bank,
         "wallet": game.wallet,

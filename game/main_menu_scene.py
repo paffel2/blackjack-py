@@ -1,12 +1,12 @@
 import pygame
 import pygame_gui
-from constants import *
-from common import *
-from game_class import *
+from .constants import *
+from .game_class.common import *
+from .game_class.game_class import *
 import sys
 import os
-from game_scene import GameScene
-from sheet_scene import SheetScene
+from .game_scene import GameScene
+from .sheet_scene import SheetScene
 
 
 class MainMenuScene:

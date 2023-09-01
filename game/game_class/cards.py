@@ -2,7 +2,7 @@ from random import shuffle
 import pygame
 import os
 from enum import Enum
-from common import *
+from .common import *
 
 
 class Suit(Enum):
@@ -45,12 +45,12 @@ class Card:
         return NotImplemented
 
 
-def to_card(str):
+def to_card(str) -> Card:
     suit_str, value_str = str.split(" ")
     return Card(Suit(suit_str), CardValue(value_str))
 
 
-def initDeck():
+def initDeck() -> list[Card]:
     tempList = []
     for i in Suit:
         for j in CardValue:
@@ -59,7 +59,7 @@ def initDeck():
     return tempList
 
 
-def read_card(card: Card):
+def read_card(card: Card) -> pygame.Surface:
     card_image_path = resource_path(
         os.path.join(f"./img/cards/{card.suit.value}", f"{card.value.value}.png")
     )

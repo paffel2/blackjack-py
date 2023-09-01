@@ -3,7 +3,7 @@ import sys
 import os
 
 
-def read_csv_to_list(list):
+def read_csv_to_list(list) -> list[dict[str, str, str]]:
     try:
         with open("./saves/results.csv", "r", newline="") as read_file:
             fieldnames = ["date", "bet", "result"]
@@ -14,7 +14,7 @@ def read_csv_to_list(list):
         return list
 
 
-def resource_path(relative):
+def resource_path(relative: str) -> str:
     if hasattr(sys, "_MEIPASS"):
         return os.path.join(sys._MEIPASS, relative)
     return os.path.join(relative)

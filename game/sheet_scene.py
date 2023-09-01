@@ -1,8 +1,8 @@
 import pygame
 import pygame_gui
-from constants import *
-from common import *
-from surfaces import *
+from .constants import *
+from .game_class.common import *
+from .surfaces import *
 
 
 class SheetScene:

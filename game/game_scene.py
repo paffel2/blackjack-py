@@ -1,9 +1,9 @@
 import pygame
 import pygame_gui
-from constants import *
-from surfaces import *
-from game_class import *
-from exceptions import *
+from .constants import *
+from .surfaces import *
+from .game_class.game_class import *
+from .game_class.exceptions import *
 
 
 class GameScene:
@@ -96,7 +96,7 @@ class GameScene:
     def clean_message_surface(self):
         self.message_surface.fill(TABLE_COLOR)
 
-    def draw_message(self, text, color=TABLE_COLOR):
+    def draw_message(self, text: str, color=TABLE_COLOR):
         render_text = self.font_of_message.render(text, 1, BLACK_COLOR)
         self.message_surface.fill(color)
         self.message_surface.blit(render_text, (100, 70))
@@ -112,7 +112,7 @@ class GameScene:
             f"bid: {self.game.bid}", 1, BLACK_COLOR
         )
 
-    def draw_card_surface(self, card):
+    def draw_card_surface(self, card: Card):
         card_image = read_card(card)
         card_image = pygame.transform.scale(card_image, (116, 160))
         card_surface = pygame.Surface((116, 160))
@@ -148,7 +148,7 @@ class GameScene:
         self.scene.blit(self.message_surface, (200, 200))
         self.manager.draw_ui(self.scene)
 
-    def play_game(self):
+    def play_game(self) -> bool:
         run = True
         while run:
             for event in pygame.event.get():
